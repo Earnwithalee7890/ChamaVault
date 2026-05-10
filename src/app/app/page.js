@@ -18,6 +18,7 @@ import {
   REAL_CUSD_ADDRESS,
   ERC20_ABI,
   CATEGORIES,
+  CELO_CHAIN_ID,
 } from "@/config/contracts";
 
 const TOKEN = CUSD_ADDRESS; // Switch to CUSD_ADDRESS for mainnet
@@ -108,6 +109,7 @@ function CreateChamaForm({ onCreated }) {
       address: CHAMAVAULT_ADDRESS,
       abi: CHAMAVAULT_ABI,
       functionName: "createChama",
+      chainId: CELO_CHAIN_ID,
       args: [
         fullName,
         TOKEN,
@@ -234,6 +236,7 @@ function ChamaCard({ chamaId, onSelect }) {
     abi: CHAMAVAULT_ABI,
     functionName: "getChamaInfo",
     args: [BigInt(chamaId)],
+    chainId: CELO_CHAIN_ID,
   });
 
   if (isLoading || !data) {
@@ -292,6 +295,7 @@ function CircleDetail({ chamaId, onBack }) {
     abi: CHAMAVAULT_ABI,
     functionName: "getChamaInfo",
     args: [BigInt(chamaId)],
+    chainId: CELO_CHAIN_ID,
   });
 
   const { data: members } = useReadContract({
@@ -299,6 +303,7 @@ function CircleDetail({ chamaId, onBack }) {
     abi: CHAMAVAULT_ABI,
     functionName: "getChamaMembers",
     args: [BigInt(chamaId)],
+    chainId: CELO_CHAIN_ID,
   });
 
   // Join
@@ -332,6 +337,7 @@ function CircleDetail({ chamaId, onBack }) {
       abi: CHAMAVAULT_ABI,
       functionName: "joinChama",
       args: [BigInt(chamaId)],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -341,6 +347,7 @@ function CircleDetail({ chamaId, onBack }) {
       abi: ERC20_ABI,
       functionName: "approve",
       args: [CHAMAVAULT_ADDRESS, contribution],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -350,6 +357,7 @@ function CircleDetail({ chamaId, onBack }) {
       abi: CHAMAVAULT_ABI,
       functionName: "contribute",
       args: [BigInt(chamaId)],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -454,6 +462,7 @@ function LeaderboardView() {
     address: CHAMAQUESTS_ADDRESS,
     abi: CHAMAQUESTS_ABI,
     functionName: "getAllUsersStats",
+    chainId: CELO_CHAIN_ID,
     query: { refetchInterval: 5000 },
   });
 
@@ -534,6 +543,7 @@ function MiningView() {
     abi: CHAMAMINER_ABI,
     functionName: "userTiers",
     args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
     query: { enabled: !!address },
   });
 
@@ -542,6 +552,7 @@ function MiningView() {
     abi: CHAMAMINER_ABI,
     functionName: "balances",
     args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
     query: { enabled: !!address },
   });
 
@@ -550,6 +561,7 @@ function MiningView() {
     abi: CHAMAMINER_ABI,
     functionName: "pendingRewards",
     args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
     query: { enabled: !!address },
   });
 
@@ -575,6 +587,7 @@ function MiningView() {
       abi: ERC20_ABI,
       functionName: "approve",
       args: [CHAMAMINER_ADDRESS, amount],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -586,6 +599,7 @@ function MiningView() {
       abi: CHAMAMINER_ABI,
       functionName: "deposit",
       args: [depositAmount],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -595,6 +609,7 @@ function MiningView() {
       address: CHAMAMINER_ADDRESS,
       abi: CHAMAMINER_ABI,
       functionName: "harvest",
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -605,6 +620,7 @@ function MiningView() {
       abi: CHAMAMINER_ABI,
       functionName: "upgradeTier",
       args: [tier],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -745,6 +761,7 @@ function RewardsView() {
     abi: CHAMAQUESTS_ABI,
     functionName: "stats",
     args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
     query: { enabled: !!address },
   });
 
@@ -753,6 +770,7 @@ function RewardsView() {
     abi: CHAMAQUESTS_ABI,
     functionName: "getNextReward",
     args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
     query: { enabled: !!address },
   });
 
@@ -769,6 +787,7 @@ function RewardsView() {
       address: CHAMAQUESTS_ADDRESS,
       abi: CHAMAQUESTS_ABI,
       functionName: "checkIn",
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -908,12 +927,14 @@ function TokenSaleView() {
     address: CHAMASALE_ADDRESS,
     abi: CHAMASALE_ABI,
     functionName: "totalChamaSold",
+    chainId: CELO_CHAIN_ID,
   });
 
   const { data: celoPriceData } = useReadContract({
     address: CHAMASALE_ADDRESS,
     abi: CHAMASALE_ABI,
     functionName: "celoPriceUsd",
+    chainId: CELO_CHAIN_ID,
   });
 
   useEffect(() => { if (buySuccess) toast("CHAMA tokens purchased! 🎉💰", "success"); }, [buySuccess]);
@@ -931,6 +952,7 @@ function TokenSaleView() {
       abi: ERC20_ABI,
       functionName: "approve",
       args: [CHAMASALE_ADDRESS, parseUnits(buyAmount || "0", 18)],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -941,6 +963,7 @@ function TokenSaleView() {
       abi: CHAMASALE_ABI,
       functionName: "buyWithCUSD",
       args: [parseUnits(buyAmount || "0", 18)],
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -950,6 +973,7 @@ function TokenSaleView() {
       to: CHAMASALE_ADDRESS,
       value: parseUnits(celoEquivalent.toFixed(18), 18),
       data: "0xd96a094a", // buyWithCELO() function selector
+      chainId: CELO_CHAIN_ID,
     });
   };
 
@@ -1077,6 +1101,7 @@ function AppContent() {
     address: CHAMAVAULT_ADDRESS,
     abi: CHAMAVAULT_ABI,
     functionName: "chamaCount",
+    chainId: CELO_CHAIN_ID,
   });
 
   // Read user's chamas
@@ -1085,6 +1110,7 @@ function AppContent() {
     abi: CHAMAVAULT_ABI,
     functionName: "getMemberChamas",
     args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
     query: { enabled: !!address },
   });
 

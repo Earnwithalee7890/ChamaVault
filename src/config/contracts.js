@@ -33,6 +33,9 @@ export const CHAMASALE_ADDRESS =
 // Real cUSD address on the network (for purchasing CHAMA)
 export const REAL_CUSD_ADDRESS = "0x765DE816845861e75A25fCA122bb6898B8B1282a";
 
+// Force all transactions to Celo Mainnet (chain ID 42220)
+export const CELO_CHAIN_ID = 42220;
+
 export const CHAMAVAULT_ABI = [
   {
     "inputs": [],
