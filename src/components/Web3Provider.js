@@ -1,36 +1,20 @@
 "use client";
-import "@rainbow-me/rainbowkit/styles.css";
-import { connectorsForWallets, RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { injectedWallet } from "@rainbow-me/rainbowkit/wallets";
-import { createConfig, WagmiProvider, http } from "wagmi";
+import { PrivyProvider } from "@privy-io/react-auth";
+import { WagmiProvider, createConfig } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { celoAlfajores, celoMainnet } from "@/config/contracts";
+import { http } from "wagmi";
 import { createContext, useContext, useState } from "react";
 
-const connectors = connectorsForWallets(
-  [
-    {
-      groupName: "Recommended",
-      wallets: [injectedWallet],
-    },
-  ],
-  {
-    appName: "ChamaVault",
-    projectId: "87106bd465234d097b8a51ba585bf799",
-  }
-);
+const queryClient = new QueryClient();
 
-const config = createConfig({
-  connectors,
+const wagmiConfig = createConfig({
   chains: [celoAlfajores, celoMainnet],
   transports: {
     [celoAlfajores.id]: http(),
     [celoMainnet.id]: http(),
   },
-  ssr: false,
 });
-
-const queryClient = new QueryClient();
 
 // App-level context for toast notifications
 const ToastContext = createContext(null);
@@ -48,60 +32,73 @@ export function Web3Provider({ children }) {
   };
 
   return (
-    <WagmiProvider config={config}>
+    <PrivyProvider
+      appId="cmp076nja00sd0cjla9bhb1zq"
+      config={{
+        loginMethods: ["email", "wallet"],
+        appearance: {
+          theme: "dark",
+          accentColor: "#34d399",
+        },
+        supportedChains: [celoAlfajores, celoMainnet],
+        embeddedWallets: {
+          createOnLogin: "users-without-wallets",
+        },
+      }}
+    >
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={darkTheme({ accentColor: "#34d399" })}>
+        <WagmiProvider config={wagmiConfig}>
           <ToastContext.Provider value={addToast}>
             {children}
             {/* Toast container */}
-          <div
-            style={{
-              position: "fixed",
-              bottom: 24,
-              right: 24,
-              zIndex: 9999,
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
-            {toasts.map((t) => (
-              <div
-                key={t.id}
-                style={{
-                  padding: "14px 24px",
-                  borderRadius: 12,
-                  background:
-                    t.type === "success"
-                      ? "rgba(52,211,153,0.15)"
-                      : t.type === "error"
-                      ? "rgba(251,113,133,0.15)"
-                      : "rgba(255,255,255,0.08)",
-                  border: `1px solid ${
-                    t.type === "success"
-                      ? "rgba(52,211,153,0.3)"
-                      : t.type === "error"
-                      ? "rgba(251,113,133,0.3)"
-                      : "rgba(255,255,255,0.15)"
-                  }`,
-                  backdropFilter: "blur(20px)",
-                  color: "#f0f4ff",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  maxWidth: 360,
-                  animation: "fadeInUp 0.3s ease",
-                }}
-              >
-                {t.type === "success" && "✅ "}
-                {t.type === "error" && "❌ "}
-                {t.type === "info" && "ℹ️ "}
-                {t.msg}
-              </div>
-            ))}
-          </div>
-        </ToastContext.Provider>
-        </RainbowKitProvider>
+            <div
+              style={{
+                position: "fixed",
+                bottom: 24,
+                right: 24,
+                zIndex: 9999,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              {toasts.map((t) => (
+                <div
+                  key={t.id}
+                  style={{
+                    padding: "14px 24px",
+                    borderRadius: 12,
+                    background:
+                      t.type === "success"
+                        ? "rgba(52,211,153,0.15)"
+                        : t.type === "error"
+                        ? "rgba(251,113,133,0.15)"
+                        : "rgba(255,255,255,0.08)",
+                    border: `1px solid ${
+                      t.type === "success"
+                        ? "rgba(52,211,153,0.3)"
+                        : t.type === "error"
+                        ? "rgba(251,113,133,0.3)"
+                        : "rgba(255,255,255,0.15)"
+                    }`,
+                    backdropFilter: "blur(20px)",
+                    color: "#f0f4ff",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    maxWidth: 360,
+                    animation: "fadeInUp 0.3s ease",
+                  }}
+                >
+                  {t.type === "success" && "✅ "}
+                  {t.type === "error" && "❌ "}
+                  {t.type === "info" && "ℹ️ "}
+                  {t.msg}
+                </div>
+              ))}
+            </div>
+          </ToastContext.Provider>
+        </WagmiProvider>
       </QueryClientProvider>
-    </WagmiProvider>
+    </PrivyProvider>
   );
 }
