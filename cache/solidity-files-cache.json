@@ -531,8 +531,8 @@
       ]
     },
     "F:\\celo may\\chamavault\\contracts\\ChamaQuests.sol": {
-      "lastModificationDate": 1778356755712,
-      "contentHash": "f6b55a888be5d0ee6e79f7876098acd3",
+      "lastModificationDate": 1778444768556,
+      "contentHash": "ab07412c128f55d59daa20d4c998f03a",
       "sourceName": "contracts/ChamaQuests.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -563,7 +563,8 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "ChamaQuests"
+        "ChamaQuests",
+        "IChamaToken"
       ]
     },
     "F:\\celo may\\chamavault\\contracts\\ChamaToken.sol": {
@@ -602,6 +603,47 @@
       ],
       "artifacts": [
         "ChamaToken"
+      ]
+    },
+    "F:\\celo may\\chamavault\\contracts\\ChamaTokenSale.sol": {
+      "lastModificationDate": 1778444743860,
+      "contentHash": "3e8146c4cd008378a29bc1fcf118e8fc",
+      "sourceName": "contracts/ChamaTokenSale.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ChamaTokenSale",
+        "IChamaToken"
       ]
     }
   }
