@@ -1,7 +1,7 @@
 "use client";
 import "./app.css";
 import { useState, useEffect, useCallback } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSendTransaction } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSendTransaction, useSwitchChain, useChainId } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
 import { Web3Provider, useToast } from "@/components/Web3Provider";
 import WalletConnect from "@/components/WalletConnect";
@@ -114,9 +114,16 @@ function CreateChamaForm({ onCreated }) {
     }
   }, [isSuccess]);
 
-  const handleCreate = () => {
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+
+  const handleCreate = async () => {
     if (!address) return toast("Connect your wallet first", "error");
     if (!form.name.trim()) return toast("Enter a circle name", "error");
+
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
 
     const fullName = `[${form.category}] ${form.name}`;
     writeContract({
@@ -352,8 +359,14 @@ function CircleDetail({ chamaId, onBack }) {
   const isMember = members?.some((m) => m.toLowerCase() === address?.toLowerCase());
   const potSize = Number(formatUnits(contribution, 18)) * Number(maxMembers);
 
-  const handleJoin = () => {
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+
+  const handleJoin = async () => {
     if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeJoin({
       address: CHAMAVAULT_ADDRESS,
       abi: CHAMAVAULT_ABI,
@@ -363,7 +376,10 @@ function CircleDetail({ chamaId, onBack }) {
     });
   };
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeApprove({
       address: TOKEN,
       abi: ERC20_ABI,
@@ -373,7 +389,10 @@ function CircleDetail({ chamaId, onBack }) {
     });
   };
 
-  const handleContribute = () => {
+  const handleContribute = async () => {
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeContribute({
       address: CHAMAVAULT_ADDRESS,
       abi: CHAMAVAULT_ABI,
@@ -611,7 +630,13 @@ function MiningView() {
   const { isSuccess: approveSuccess } = useWaitForTransactionReceipt({ hash: approveTx });
   useEffect(() => { if (approveSuccess) toast("cUSD approved! Now confirm your action.", "success"); }, [approveSuccess]);
 
-  const handleApprove = (amount) => {
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+
+  const handleApprove = async (amount) => {
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeApprove({
       address: TOKEN,
       abi: ERC20_ABI,
@@ -621,8 +646,11 @@ function MiningView() {
     });
   };
 
-  const handleDepositMine = () => {
+  const handleDepositMine = async () => {
     if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     const depositAmount = parseUnits("10", 18); 
     writeContract({
       address: CHAMAMINER_ADDRESS,
@@ -633,8 +661,11 @@ function MiningView() {
     });
   };
 
-  const handleHarvest = () => {
+  const handleHarvest = async () => {
     if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeContract({
       address: CHAMAMINER_ADDRESS,
       abi: CHAMAMINER_ABI,
@@ -643,8 +674,11 @@ function MiningView() {
     });
   };
 
-  const handleUpgrade = (tier) => {
+  const handleUpgrade = async (tier) => {
     if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeContract({
       address: CHAMAMINER_ADDRESS,
       abi: CHAMAMINER_ABI,
@@ -777,6 +811,9 @@ function MiningView() {
 function RewardsView() {
   const { address } = useAccount();
   const toast = useToast();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+
   const [tasks, setTasks] = useState([
     { id: 1, title: "Follow @ChamaVault on X", reward: "+50 XP", done: false, link: "https://twitter.com" },
     { id: 2, title: "Retweet Launch Post", reward: "+30 XP", done: false, link: "https://twitter.com" },
@@ -822,8 +859,17 @@ function RewardsView() {
     }
   }, [isSuccess]);
 
-  const handleCheckIn = () => {
+  const handleCheckIn = async () => {
     if (!address) return toast("Connect wallet first", "error");
+    
+    if (chainId !== CELO_CHAIN_ID) {
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+      } catch (err) {
+        return toast("Please switch to Celo Mainnet", "error");
+      }
+    }
+
     writeContract({
       address: CHAMAQUESTS_ADDRESS,
       abi: CHAMAQUESTS_ABI,
@@ -990,12 +1036,18 @@ function TokenSaleView() {
   useEffect(() => { if (approveSuccess) toast("cUSD approved! Now click Buy.", "success"); }, [approveSuccess]);
   useEffect(() => { if (celoSuccess) toast("CHAMA tokens purchased with CELO! 🎉", "success"); }, [celoSuccess]);
 
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+
   const chamaYouGet = parseFloat(buyAmount || 0) * 10000;
   const celoPrice = celoPriceData ? Number(celoPriceData) / 1000 : 0.5;
   const celoEquivalent = parseFloat(buyAmount || 0) / celoPrice;
 
-  const handleApproveCUSD = () => {
+  const handleApproveCUSD = async () => {
     if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeApprove({
       address: REAL_CUSD_ADDRESS,
       abi: ERC20_ABI,
@@ -1005,8 +1057,11 @@ function TokenSaleView() {
     });
   };
 
-  const handleBuyWithCUSD = () => {
+  const handleBuyWithCUSD = async () => {
     if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     writeBuy({
       address: CHAMASALE_ADDRESS,
       abi: CHAMASALE_ABI,
@@ -1016,8 +1071,11 @@ function TokenSaleView() {
     });
   };
 
-  const handleBuyWithCELO = () => {
+  const handleBuyWithCELO = async () => {
     if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
     sendTransaction({
       to: CHAMASALE_ADDRESS,
       value: parseUnits(celoEquivalent.toFixed(18), 18),

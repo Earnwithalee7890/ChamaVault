@@ -33,7 +33,7 @@ export function Web3Provider({ children }) {
 
   return (
     <PrivyProvider
-      appId="cmp076nja00sd0cjla9bhb1zq"
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmp076nja00sd0cjla9bhb1zq"}
       config={{
         loginMethods: ["email", "wallet"],
         appearance: {

@@ -2,7 +2,7 @@
 // After deploying, update the address below
 export const CHAMAVAULT_ADDRESS =
   process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
-  "0x0000000000000000000000000000000000000000";
+  "0x73702c74dce82b36161C258697B14d162831172a";
 
 export const CHAMAMINER_ADDRESS = 
   process.env.NEXT_PUBLIC_MINER_ADDRESS ||
@@ -12,17 +12,9 @@ export const CHAMAQUESTS_ADDRESS =
   process.env.NEXT_PUBLIC_QUESTS_ADDRESS ||
   "0x4B5FB224Dd3599D14aaf850b594A46279EEDb0A0";
 
-// Custom ChamaToken (CHMT) used instead of cUSD
-export const CUSD_ADDRESS =
-  process.env.NEXT_PUBLIC_CUSD_ADDRESS ||
-  "0xC7bE21448A1c518d7Bb982d96D3D93CA62E2b9E8";
-
-// cUSD on Alfajores testnet
-export const CUSD_TESTNET_ADDRESS = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
-
-// ChamaToken address (the CHMT token itself)
+// Custom ChamaToken (CHMT) address
 export const CHAMATOKEN_ADDRESS =
-  process.env.NEXT_PUBLIC_CUSD_ADDRESS ||
+  process.env.NEXT_PUBLIC_TOKEN_ADDRESS ||
   "0xC7bE21448A1c518d7Bb982d96D3D93CA62E2b9E8";
 
 // ChamaTokenSale address
@@ -31,7 +23,12 @@ export const CHAMASALE_ADDRESS =
   "0xF71FABE23B5bfc99A9df6EA5355cb4000626aaA1";
 
 // Real cUSD address on the network (for purchasing CHAMA)
-export const REAL_CUSD_ADDRESS = "0x765DE816845861e75A25fCA122bb6898B8B1282a";
+export const REAL_CUSD_ADDRESS = 
+  process.env.NEXT_PUBLIC_CUSD_ADDRESS ||
+  "0x765DE816845861e75A25fCA122bb6898B8B1282a";
+
+// Legacy export (pointing to CHMT)
+export const CUSD_ADDRESS = CHAMATOKEN_ADDRESS;
 
 // Force all transactions to Celo Mainnet (chain ID 42220)
 export const CELO_CHAIN_ID = 42220;
