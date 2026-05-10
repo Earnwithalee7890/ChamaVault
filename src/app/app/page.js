@@ -12,7 +12,10 @@ import {
   CHAMAMINER_ADDRESS,
   CHAMAQUESTS_ABI,
   CHAMAQUESTS_ADDRESS,
+  CHAMASALE_ABI,
+  CHAMASALE_ADDRESS,
   CUSD_ADDRESS,
+  REAL_CUSD_ADDRESS,
   ERC20_ABI,
   CATEGORIES,
 } from "@/config/contracts";
@@ -53,6 +56,11 @@ function AppNav({ view, setView }) {
           <li>
             <a href="#" onClick={() => setView("mining")} style={{ color: view === "mining" ? "#34d399" : undefined }} id="nav-mining">
               Mining
+            </a>
+          </li>
+          <li>
+            <a href="#" onClick={() => setView("buy")} style={{ color: view === "buy" ? "#34d399" : undefined }} id="nav-buy">
+              Buy CHAMA
             </a>
           </li>
           <li>
@@ -740,10 +748,18 @@ function RewardsView() {
     query: { enabled: !!address },
   });
 
+  const { data: nextRewardData } = useReadContract({
+    address: CHAMAQUESTS_ADDRESS,
+    abi: CHAMAQUESTS_ABI,
+    functionName: "getNextReward",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+
   useEffect(() => {
     if (isSuccess) {
       refetchStats();
-      toast("On-chain check-in confirmed! 🔥", "success");
+      toast("Check-in confirmed! CHAMA tokens minted to your wallet! 🔥💰", "success");
     }
   }, [isSuccess]);
 
@@ -758,7 +774,11 @@ function RewardsView() {
 
   const currentStreak = myStats ? Number(myStats[1]) : 0;
   const lastCheckIn = myStats ? Number(myStats[2]) : 0;
+  const totalClaimed = myStats ? Number(formatUnits(myStats[3] || 0n, 18)) : 0;
   const canCheckIn = lastCheckIn === 0 || (Date.now() / 1000 >= lastCheckIn + 86400);
+  const dayInCycle = currentStreak > 0 ? ((currentStreak - 1) % 7) + 1 : 0;
+  const nextRewardAmount = nextRewardData ? Number(formatUnits(nextRewardData[0], 18)) : 10;
+  const nextDay = nextRewardData ? Number(nextRewardData[1]) : 1;
 
   const verifyTask = (id, link) => {
     window.open(link, '_blank');
@@ -766,8 +786,11 @@ function RewardsView() {
     setTimeout(() => {
       setTasks(tasks.map(t => t.id === id ? { ...t, done: true } : t));
       toast("Task verified! Reward claimed.", "success");
-    }, 4000); 
+    }, 4000);
   };
+
+  // 7-day cycle visualization
+  const cycleDays = [1, 2, 3, 4, 5, 6, 7];
 
   return (
     <>
@@ -775,49 +798,82 @@ function RewardsView() {
         <h2>
           Quests & <span className="text-gradient">Rewards</span>
         </h2>
-        <p>Complete daily tasks and check-ins to boost your ecosystem reputation.</p>
+        <p>Check in daily to earn escalating CHAMA token rewards. Streak resets reward cycle every 7 days!</p>
       </div>
 
-      <div style={{ maxWidth: 600, margin: "0 auto" }}>
-        <div className="glass-card" style={{ padding: 40, display: "flex", flexDirection: "column", gap: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+
+        {/* Streak + Next Reward Card */}
+        <div className="glass-card" style={{ padding: 32, border: "1px solid rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <span style={{ fontSize: 36 }}>🎯</span>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0 }}>Daily Quests</h3>
+              <span style={{ fontSize: 40 }}>🔥</span>
+              <div>
+                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 28, margin: 0 }}>{currentStreak} Day Streak</h3>
+                <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>Total CHAMA earned: {totalClaimed.toFixed(0)}</p>
+              </div>
             </div>
-            <div style={{ background: "rgba(251, 191, 36, 0.15)", border: "1px solid rgba(251, 191, 36, 0.3)", color: "#fbbf24", padding: "8px 16px", borderRadius: 24, fontSize: 14, fontWeight: 800 }}>
-              🔥 {currentStreak} Day Streak
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1 }}>Next Reward</div>
+              <div style={{ fontSize: 32, fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--accent-emerald)" }}>{nextRewardAmount}</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>CHAMA</div>
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 20, background: "rgba(255,255,255,0.03)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.05)" }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Daily On-Chain Check-In</div>
-              <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Claim your daily +10 XP</div>
-            </div>
-            <button 
-              className="btn btn-secondary" 
-              onClick={handleCheckIn} 
-              disabled={!canCheckIn || isPending}
-              style={{ padding: "10px 20px", fontSize: 14, background: !canCheckIn ? "rgba(52,211,153,0.1)" : undefined, color: !canCheckIn ? "#34d399" : undefined, borderColor: !canCheckIn ? "rgba(52,211,153,0.3)" : undefined }}
-            >
-              {isPending ? "⏳ Signing..." : !canCheckIn ? "✅ Checked In" : "Check In"}
-            </button>
-          </div>
-
-          <div style={{ height: 1, background: "var(--border-glass)", margin: "8px 0" }}></div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-secondary)" }}>One-Time Tasks</div>
-            {tasks.map(task => (
-              <div key={task.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 20, background: "rgba(255,255,255,0.03)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.05)" }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{task.title}</div>
-                  <div style={{ fontSize: 13, color: "var(--accent-emerald)", fontWeight: 600 }}>{task.reward}</div>
+          {/* 7-Day Cycle Visualization */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+            {cycleDays.map((d) => {
+              const isCompleted = dayInCycle >= d;
+              const isCurrent = dayInCycle === d;
+              const reward = d * 10;
+              return (
+                <div
+                  key={d}
+                  style={{
+                    flex: 1,
+                    textAlign: "center",
+                    padding: "12px 4px",
+                    borderRadius: 12,
+                    background: isCompleted ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.03)",
+                    border: isCurrent ? "2px solid #34d399" : isCompleted ? "1px solid rgba(52,211,153,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                    transition: "all 0.3s",
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Day {d}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: isCompleted ? "#34d399" : "var(--text-secondary)" }}>{reward}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)" }}>CHAMA</div>
+                  {isCompleted && <div style={{ fontSize: 12, marginTop: 4 }}>✅</div>}
                 </div>
-                <button 
-                  className="btn btn-secondary" 
-                  onClick={() => verifyTask(task.id, task.link)} 
+              );
+            })}
+          </div>
+
+          <button
+            className="btn btn-primary"
+            onClick={handleCheckIn}
+            disabled={!canCheckIn || isPending}
+            style={{ width: "100%", justifyContent: "center", padding: "16px", fontSize: 16 }}
+          >
+            {isPending ? "⏳ Confirming on-chain..." : !canCheckIn ? `✅ Checked In Today (Day ${dayInCycle}/7)` : `🎯 Check In — Earn ${nextRewardAmount} CHAMA`}
+          </button>
+        </div>
+
+        {/* One-Time Social Tasks */}
+        <div className="glass-card" style={{ padding: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            <span style={{ fontSize: 28 }}>🏆</span>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 20, margin: 0 }}>Bonus Tasks</h3>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {tasks.map(task => (
+              <div key={task.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 16, background: "rgba(255,255,255,0.03)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{task.title}</div>
+                  <div style={{ fontSize: 12, color: "var(--accent-emerald)", fontWeight: 600 }}>{task.reward}</div>
+                </div>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => verifyTask(task.id, task.link)}
                   disabled={task.done}
                   style={{ padding: "8px 20px", fontSize: 13, background: task.done ? "rgba(52,211,153,0.1)" : undefined, color: task.done ? "#34d399" : undefined, borderColor: task.done ? "rgba(52,211,153,0.3)" : undefined }}
                 >
@@ -826,7 +882,183 @@ function RewardsView() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
+/* ===== Token Sale View ===== */
+function TokenSaleView() {
+  const { address } = useAccount();
+  const toast = useToast();
+  const [buyAmount, setBuyAmount] = useState("1");
+  const [buyMethod, setBuyMethod] = useState("cusd"); // "cusd" or "celo"
+
+  const { writeContract: writeBuy, data: buyTx, isPending: buying } = useWriteContract();
+  const { isSuccess: buySuccess } = useWaitForTransactionReceipt({ hash: buyTx });
+
+  const { writeContract: writeApprove, data: approveTx, isPending: approving } = useWriteContract();
+  const { isSuccess: approveSuccess } = useWaitForTransactionReceipt({ hash: approveTx });
+
+  const { sendTransaction, data: celoTx, isPending: sendingCelo } = useSendTransaction();
+  const { isSuccess: celoSuccess } = useWaitForTransactionReceipt({ hash: celoTx });
+
+  const { data: totalSold } = useReadContract({
+    address: CHAMASALE_ADDRESS,
+    abi: CHAMASALE_ABI,
+    functionName: "totalChamaSold",
+  });
+
+  const { data: celoPriceData } = useReadContract({
+    address: CHAMASALE_ADDRESS,
+    abi: CHAMASALE_ABI,
+    functionName: "celoPriceUsd",
+  });
+
+  useEffect(() => { if (buySuccess) toast("CHAMA tokens purchased! 🎉💰", "success"); }, [buySuccess]);
+  useEffect(() => { if (approveSuccess) toast("cUSD approved! Now click Buy.", "success"); }, [approveSuccess]);
+  useEffect(() => { if (celoSuccess) toast("CHAMA tokens purchased with CELO! 🎉", "success"); }, [celoSuccess]);
+
+  const chamaYouGet = parseFloat(buyAmount || 0) * 10000;
+  const celoPrice = celoPriceData ? Number(celoPriceData) / 1000 : 0.5;
+  const celoEquivalent = parseFloat(buyAmount || 0) / celoPrice;
+
+  const handleApproveCUSD = () => {
+    if (!address) return toast("Connect wallet first", "error");
+    writeApprove({
+      address: REAL_CUSD_ADDRESS,
+      abi: ERC20_ABI,
+      functionName: "approve",
+      args: [CHAMASALE_ADDRESS, parseUnits(buyAmount || "0", 18)],
+    });
+  };
+
+  const handleBuyWithCUSD = () => {
+    if (!address) return toast("Connect wallet first", "error");
+    writeBuy({
+      address: CHAMASALE_ADDRESS,
+      abi: CHAMASALE_ABI,
+      functionName: "buyWithCUSD",
+      args: [parseUnits(buyAmount || "0", 18)],
+    });
+  };
+
+  const handleBuyWithCELO = () => {
+    if (!address) return toast("Connect wallet first", "error");
+    sendTransaction({
+      to: CHAMASALE_ADDRESS,
+      value: parseUnits(celoEquivalent.toFixed(18), 18),
+      data: "0xd96a094a", // buyWithCELO() function selector
+    });
+  };
+
+  return (
+    <>
+      <div className="section-header" style={{ marginBottom: 32 }}>
+        <h2>
+          Buy <span className="text-gradient">CHAMA</span> Tokens
+        </h2>
+        <p>Purchase CHAMA tokens with cUSD or CELO. $1 = 10,000 CHAMA</p>
+      </div>
+
+      <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+        {/* Sale Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="glass-card" style={{ padding: 24, textAlign: "center" }}>
+            <div style={{ color: "var(--text-muted)", fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>Price</div>
+            <div className="text-gradient" style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)" }}>$0.0001</div>
+            <div style={{ color: "var(--text-muted)", fontSize: 12 }}>per CHAMA</div>
+          </div>
+          <div className="glass-card" style={{ padding: 24, textAlign: "center" }}>
+            <div style={{ color: "var(--text-muted)", fontSize: 12, textTransform: "uppercase", letterSpacing: 1 }}>Total Sold</div>
+            <div className="text-gradient" style={{ fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)" }}>
+              {totalSold ? Number(formatUnits(totalSold, 18)).toLocaleString() : "0"}
+            </div>
+            <div style={{ color: "var(--text-muted)", fontSize: 12 }}>CHAMA</div>
+          </div>
+        </div>
+
+        {/* Buy Card */}
+        <div className="glass-card" style={{ padding: 40, border: "1px solid rgba(52,211,153,0.2)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
+            <span style={{ fontSize: 40 }}>🪙</span>
+            <div>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 24, margin: 0 }}>Token Sale</h3>
+              <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>10,000 CHAMA per $1 cUSD</p>
+            </div>
+          </div>
+
+          {/* Method Toggle */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+            <button
+              className={`freq-btn ${buyMethod === "cusd" ? "active" : ""}`}
+              onClick={() => setBuyMethod("cusd")}
+            >
+              💵 Pay with cUSD
+            </button>
+            <button
+              className={`freq-btn ${buyMethod === "celo" ? "active" : ""}`}
+              onClick={() => setBuyMethod("celo")}
+            >
+              🟡 Pay with CELO
+            </button>
+          </div>
+
+          {/* Amount Input */}
+          <label className="form-label">
+            {buyMethod === "cusd" ? "Amount in cUSD" : `Amount in USD (≈ ${celoEquivalent.toFixed(4)} CELO)`}
+          </label>
+          <input
+            className="form-input"
+            type="number"
+            min="0.01"
+            step="0.01"
+            placeholder="1.00"
+            value={buyAmount}
+            onChange={(e) => setBuyAmount(e.target.value)}
+            id="input-buy-amount"
+          />
+
+          {/* Preview */}
+          <div className="glass-card" style={{ padding: 20, marginTop: 16, marginBottom: 24, textAlign: "center" }}>
+            <div style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 4 }}>You will receive</div>
+            <div style={{ fontSize: 36, fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--accent-emerald)" }}>
+              {chamaYouGet.toLocaleString()}
+            </div>
+            <div style={{ color: "var(--text-muted)", fontSize: 14 }}>CHAMA Tokens</div>
+          </div>
+
+          {/* Buy Buttons */}
+          {buyMethod === "cusd" ? (
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                className="btn btn-secondary"
+                onClick={handleApproveCUSD}
+                disabled={approving}
+                style={{ flex: 1, justifyContent: "center", padding: "14px" }}
+              >
+                {approving ? "⏳ Approving..." : "✅ Step 1: Approve cUSD"}
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleBuyWithCUSD}
+                disabled={buying}
+                style={{ flex: 1, justifyContent: "center", padding: "14px" }}
+              >
+                {buying ? "⏳ Buying..." : "🪙 Step 2: Buy CHAMA"}
+              </button>
+            </div>
+          ) : (
+            <button
+              className="btn btn-primary"
+              onClick={handleBuyWithCELO}
+              disabled={sendingCelo}
+              style={{ width: "100%", justifyContent: "center", padding: "16px", fontSize: 16 }}
+            >
+              {sendingCelo ? "⏳ Sending CELO..." : `🟡 Buy ${chamaYouGet.toLocaleString()} CHAMA with CELO`}
+            </button>
+          )}
         </div>
       </div>
     </>
@@ -979,6 +1211,9 @@ function AppContent() {
 
         {/* ===== REWARDS VIEW ===== */}
         {view === "rewards" && <RewardsView />}
+
+        {/* ===== BUY CHAMA VIEW ===== */}
+        {view === "buy" && <TokenSaleView />}
       </div>
     </>
   );
