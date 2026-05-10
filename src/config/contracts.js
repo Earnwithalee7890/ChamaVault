@@ -28,10 +28,10 @@ export const CHAMATOKEN_ADDRESS =
 // ChamaTokenSale address
 export const CHAMASALE_ADDRESS =
   process.env.NEXT_PUBLIC_SALE_ADDRESS ||
-  "0x0000000000000000000000000000000000000000";
+  "0xF71FABE23B5bfc99A9df6EA5355cb4000626aaA1";
 
 // Real cUSD address on the network (for purchasing CHAMA)
-export const REAL_CUSD_ADDRESS = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
+export const REAL_CUSD_ADDRESS = "0x765DE816845861e75A25fCA122bb6898B8B1282a";
 
 export const CHAMAVAULT_ABI = [
   {
