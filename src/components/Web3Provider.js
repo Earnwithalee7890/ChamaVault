@@ -9,10 +9,10 @@ import { createContext, useContext, useState } from "react";
 const queryClient = new QueryClient();
 
 const wagmiConfig = createConfig({
-  chains: [celoAlfajores, celoMainnet],
+  chains: [celoMainnet, celoAlfajores],
   transports: {
-    [celoAlfajores.id]: http(),
     [celoMainnet.id]: http(),
+    [celoAlfajores.id]: http(),
   },
 });
 
@@ -40,7 +40,8 @@ export function Web3Provider({ children }) {
           theme: "dark",
           accentColor: "#34d399",
         },
-        supportedChains: [celoAlfajores, celoMainnet],
+        defaultChain: celoMainnet,
+        supportedChains: [celoMainnet, celoAlfajores],
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
         },
