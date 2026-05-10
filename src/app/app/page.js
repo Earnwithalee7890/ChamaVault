@@ -843,7 +843,7 @@ function RewardsView() {
     query: { enabled: !!address },
   });
 
-  const { data: nextRewardData } = useReadContract({
+  const { data: nextRewardData, refetch: refetchNextReward } = useReadContract({
     address: CHAMAQUESTS_ADDRESS,
     abi: CHAMAQUESTS_ABI,
     functionName: "getNextReward",
@@ -854,7 +854,11 @@ function RewardsView() {
 
   useEffect(() => {
     if (isSuccess) {
-      refetchStats();
+      // Small delay to ensure block indexer catch up
+      setTimeout(() => {
+        refetchStats();
+        refetchNextReward();
+      }, 1000);
       toast("Check-in confirmed! CHAMA tokens minted to your wallet! 🔥💰", "success");
     }
   }, [isSuccess]);
@@ -878,13 +882,16 @@ function RewardsView() {
     });
   };
 
-  const currentStreak = myStats ? Number(myStats[1]) : 0;
-  const lastCheckIn = myStats ? Number(myStats[2]) : 0;
-  const totalClaimed = myStats ? Number(formatUnits(myStats[3] || 0n, 18)) : 0;
+  const currentStreak = myStats ? Number(myStats.streak ?? myStats[1] ?? 0) : 0;
+  const lastCheckIn = myStats ? Number(myStats.lastCheckIn ?? myStats[2] ?? 0) : 0;
+  const totalClaimed = myStats ? Number(formatUnits(myStats.totalClaimed ?? myStats[3] ?? 0n, 18)) : 0;
   const canCheckIn = lastCheckIn === 0 || (Date.now() / 1000 >= lastCheckIn + 86400);
   const dayInCycle = currentStreak > 0 ? ((currentStreak - 1) % 7) + 1 : 0;
-  const nextRewardAmount = nextRewardData ? Number(formatUnits(nextRewardData[0], 18)) : 10;
-  const nextDay = nextRewardData ? Number(nextRewardData[1]) : 1;
+  
+  const nextRewardAmount = nextRewardData 
+    ? Number(formatUnits(nextRewardData.chamaAmount ?? nextRewardData[0] ?? 0n, 18)) 
+    : 10;
+  const nextDay = nextRewardData ? Number(nextRewardData.dayInCycle ?? nextRewardData[1] ?? 1) : 1;
 
   const verifyTask = (id, link) => {
     window.open(link, '_blank');
