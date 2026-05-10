@@ -1,7 +1,7 @@
 "use client";
 import "@rainbow-me/rainbowkit/styles.css";
 import { connectorsForWallets, RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { metaMaskWallet, injectedWallet, walletConnectWallet } from "@rainbow-me/rainbowkit/wallets";
+import { metaMaskWallet, injectedWallet } from "@rainbow-me/rainbowkit/wallets";
 import { createConfig, WagmiProvider, http } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { celoAlfajores, celoMainnet } from "@/config/contracts";
@@ -11,7 +11,7 @@ const connectors = connectorsForWallets(
   [
     {
       groupName: "Recommended",
-      wallets: [metaMaskWallet, injectedWallet, walletConnectWallet],
+      wallets: [metaMaskWallet, injectedWallet],
     },
   ],
   {
@@ -27,7 +27,7 @@ const config = createConfig({
     [celoAlfajores.id]: http(),
     [celoMainnet.id]: http(),
   },
-  ssr: true,
+  ssr: false,
 });
 
 const queryClient = new QueryClient();
