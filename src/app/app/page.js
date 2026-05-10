@@ -90,8 +90,22 @@ function CreateChamaForm({ onCreated }) {
     maxMembers: "5",
   });
 
-  const { writeContract, data: txHash, isPending } = useWriteContract();
-  const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
+  const { isSuccess, error: txError } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    if (writeError) {
+      console.error("CreateChama Write Error:", writeError);
+      toast(writeError.shortMessage || writeError.message || "Transaction failed", "error");
+    }
+  }, [writeError]);
+
+  useEffect(() => {
+    if (txError) {
+      console.error("CreateChama TX Error:", txError);
+      toast("Transaction receipt error", "error");
+    }
+  }, [txError]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -307,16 +321,24 @@ function CircleDetail({ chamaId, onBack }) {
   });
 
   // Join
-  const { writeContract: writeJoin, data: joinTx, isPending: joining } = useWriteContract();
-  const { isSuccess: joinSuccess } = useWaitForTransactionReceipt({ hash: joinTx });
+  const { writeContract: writeJoin, data: joinTx, isPending: joining, error: joinError } = useWriteContract();
+  const { isSuccess: joinSuccess, error: joinTxError } = useWaitForTransactionReceipt({ hash: joinTx });
 
   // Approve cUSD
-  const { writeContract: writeApprove, data: approveTx, isPending: approving } = useWriteContract();
-  const { isSuccess: approveSuccess } = useWaitForTransactionReceipt({ hash: approveTx });
+  const { writeContract: writeApprove, data: approveTx, isPending: approving, error: approveError } = useWriteContract();
+  const { isSuccess: approveSuccess, error: approveTxError } = useWaitForTransactionReceipt({ hash: approveTx });
 
   // Contribute
-  const { writeContract: writeContribute, data: contributeTx, isPending: contributing } = useWriteContract();
-  const { isSuccess: contributeSuccess } = useWaitForTransactionReceipt({ hash: contributeTx });
+  const { writeContract: writeContribute, data: contributeTx, isPending: contributing, error: contributeError } = useWriteContract();
+  const { isSuccess: contributeSuccess, error: contributeTxError } = useWaitForTransactionReceipt({ hash: contributeTx });
+
+  useEffect(() => {
+    const error = joinError || approveError || contributeError || joinTxError || approveTxError || contributeTxError;
+    if (error) {
+      console.error("Circle Detail Error:", error);
+      toast(error.shortMessage || error.message || "Action failed", "error");
+    }
+  }, [joinError, approveError, contributeError, joinTxError, approveTxError, contributeTxError]);
 
   useEffect(() => { if (joinSuccess) toast("Joined circle! 🎉", "success"); }, [joinSuccess]);
   useEffect(() => { if (approveSuccess) toast("cUSD approved! Now contribute.", "success"); }, [approveSuccess]);
@@ -565,8 +587,16 @@ function MiningView() {
     query: { enabled: !!address },
   });
 
-  const { writeContract, data: txHash, isPending } = useWriteContract();
-  const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
+  const { isSuccess, error: txError } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    const error = writeError || txError;
+    if (error) {
+      console.error("Mining Error:", error);
+      toast(error.shortMessage || error.message || "Mining action failed", "error");
+    }
+  }, [writeError, txError]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -753,8 +783,19 @@ function RewardsView() {
     { id: 3, title: "Join Discord Community", reward: "+40 XP", done: false, link: "https://discord.com" },
   ]);
 
-  const { writeContract, data: txHash, isPending } = useWriteContract();
-  const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
+  const { isSuccess, error: txError } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    if (writeError) {
+      console.error("Rewards Write Error:", writeError);
+      toast(writeError.shortMessage || writeError.message || "Check-in failed", "error");
+    }
+    if (txError) {
+      console.error("Rewards TX Error:", txError);
+      toast("Check-in receipt error", "error");
+    }
+  }, [writeError, txError]);
 
   const { data: myStats, refetch: refetchStats } = useReadContract({
     address: CHAMAQUESTS_ADDRESS,
@@ -914,14 +955,22 @@ function TokenSaleView() {
   const [buyAmount, setBuyAmount] = useState("1");
   const [buyMethod, setBuyMethod] = useState("cusd"); // "cusd" or "celo"
 
-  const { writeContract: writeBuy, data: buyTx, isPending: buying } = useWriteContract();
-  const { isSuccess: buySuccess } = useWaitForTransactionReceipt({ hash: buyTx });
+  const { writeContract: writeBuy, data: buyTx, isPending: buying, error: buyError } = useWriteContract();
+  const { isSuccess: buySuccess, error: buyTxError } = useWaitForTransactionReceipt({ hash: buyTx });
 
-  const { writeContract: writeApprove, data: approveTx, isPending: approving } = useWriteContract();
-  const { isSuccess: approveSuccess } = useWaitForTransactionReceipt({ hash: approveTx });
+  const { writeContract: writeApprove, data: approveTx, isPending: approving, error: approveError } = useWriteContract();
+  const { isSuccess: approveSuccess, error: approveTxError } = useWaitForTransactionReceipt({ hash: approveTx });
 
-  const { sendTransaction, data: celoTx, isPending: sendingCelo } = useSendTransaction();
-  const { isSuccess: celoSuccess } = useWaitForTransactionReceipt({ hash: celoTx });
+  const { sendTransaction, data: celoTx, isPending: sendingCelo, error: celoError } = useSendTransaction();
+  const { isSuccess: celoSuccess, error: celoTxError } = useWaitForTransactionReceipt({ hash: celoTx });
+
+  useEffect(() => {
+    const error = buyError || approveError || celoError || buyTxError || approveTxError || celoTxError;
+    if (error) {
+      console.error("Token Sale Error:", error);
+      toast(error.shortMessage || error.message || "Purchase failed", "error");
+    }
+  }, [buyError, approveError, celoError, buyTxError, approveTxError, celoTxError]);
 
   const { data: totalSold } = useReadContract({
     address: CHAMASALE_ADDRESS,
