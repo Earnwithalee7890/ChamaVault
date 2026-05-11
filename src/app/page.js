@@ -93,6 +93,48 @@ const steps = [
   { num: "4", title: "Receive Your Pot", desc: "When it's your turn, the full pot is released to your wallet instantly. Then the cycle continues!" },
 ];
 
+/* ---- Scroll To Top ---- */
+function ScrollToTop() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const toggle = () => setVisible(window.scrollY > 500);
+    window.addEventListener("scroll", toggle);
+    return () => window.removeEventListener("scroll", toggle);
+  }, []);
+  const scroll = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  return (
+    <button 
+      className={`scroll-to-top ${visible ? "visible" : ""}`} 
+      onClick={scroll}
+      aria-label="Scroll to top"
+    >
+      ↑
+      <style jsx>{`
+        .scroll-to-top {
+          position: fixed;
+          bottom: 32px;
+          left: 32px;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: var(--bg-card);
+          border: 1px solid var(--border-glass);
+          color: var(--accent-emerald);
+          font-size: 20px;
+          cursor: pointer;
+          z-index: 1000;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          backdrop-filter: blur(10px);
+        }
+        .scroll-to-top.visible { opacity: 1; transform: translateY(0); }
+        .scroll-to-top:hover { background: var(--accent-emerald); color: var(--bg-primary); transform: translateY(-5px); }
+      `}</style>
+    </button>
+  );
+}
+
 export default function Home() {
   const featuresRef = useAnimateIn();
   const stepsRef = useAnimateIn();
@@ -103,6 +145,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
+      <ScrollToTop />
 
       {/* ===== HERO ===== */}
       <section className="hero" id="hero">
