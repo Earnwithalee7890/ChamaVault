@@ -1,98 +1,100 @@
 # 🏦 ChamaVault
-**Built for Celo Proof of Ship**
+**Decentralized Savings Circles — Built for Celo Proof of Ship**
 
-![ChamaVault Banner](https://via.placeholder.com/1200x400/111827/34d399?text=ChamaVault+-+On-Chain+Savings+Circles)
+![ChamaVault Banner](https://raw.githubusercontent.com/Earnwithalee7890/ChamaVault/main/public/banner.png)
 
-Africa's centuries-old rotating savings tradition (Chama/Susu/Tontine) — now trustless, transparent, and powered by Celo stablecoins (cUSD). Create or join a Chama circle and let smart contracts handle the trust.
+> "Save Together, Grow Together."
 
-## 🌟 The Problem
-Traditional savings circles rely on immense interpersonal trust. Middlemen or treasurers hold the funds, which can lead to delays, mismanagement, or outright theft. Furthermore, members cannot build verifiable, portable financial reputations from their positive savings habits.
-
-## 💡 The ChamaVault Solution
-ChamaVault replaces the trusted treasurer with immutable smart contracts on the Celo blockchain:
-- **Trustless:** Funds are locked in a smart contract and paid out automatically when a round concludes.
-- **Stable:** All contributions and payouts are handled in **cUSD** to prevent volatility.
-- **Global & Accessible:** Integrated with MiniPay, making onboarding instant for everyday users without needing crypto knowledge.
-- **Reputation-based:** Users build an on-chain "Trust Score" by making timely contributions.
+ChamaVault digitizes Africa's centuries-old rotating savings tradition (Chama, Susu, Tontine) with blockchain-powered trust. By replacing middlemen with immutable smart contracts, we enable secure, transparent, and cross-border savings circles powered by Celo stablecoins.
 
 ---
 
-## 🚀 Features
+## 🌟 The Vision
+Traditional savings circles (Chamas) are the bedrock of community finance in Africa, yet they rely on absolute interpersonal trust. Funds are often managed manually, leading to mismanagement, lack of transparency, and zero credit-building potential.
 
-### 1. 🤝 Trustless Rotating Savings Circles
-Users can deploy a custom savings circle with parameters:
-- Contribution Amount (e.g., 10 cUSD)
-- Contribution Frequency (Daily, Weekly, Bi-weekly, Monthly)
-- Max Members
-
-### 2. ⛏️ The ChamaMiner System
-A built-in staking and yielding protocol that allows users to deposit their cUSD to passively mine **yCHAMA** (Yield Chama) tokens.
-- **Upgradable Mining Machines:** Users can spend cUSD to upgrade their mining tier.
-- **LITE Tier (1.5x Multiplier):** Costs 10 cUSD.
-- **PRO Tier (3x Multiplier):** Costs 50 cUSD.
-- Generates continuous on-chain activity and yields!
-
-### 3. 🎯 Daily Quests & Streaks
-Users can check in daily using a zero-value Celo transaction to build an on-chain streak, rewarding active ecosystem participants.
-
-### 4. 📊 Live Reputation Leaderboard
-Track the most reliable savers through an on-chain global reputation index.
+**ChamaVault solves this by:**
+- **Automating Trust:** Smart contracts enforce contribution schedules and automate payouts.
+- **Removing Volatility:** All transactions use **cUSD**, ensuring savings maintain their value.
+- **Building Reputation:** Every contribution builds an on-chain "Trust Score," creating a portable financial identity.
+- **Yield Generation:** Integrated "Mining Rigs" allow idle funds to generate yield through our native protocol.
 
 ---
 
-## 🛠 Tech Stack
-- **Blockchain:** Celo Alfajores & Celo Mainnet
-- **Smart Contracts:** Solidity, Hardhat, OpenZeppelin
-- **Frontend:** Next.js, React, Web3.js / viem / wagmi
-- **Wallet Connection:** ConnectKit / Wagmi (Optimized for MiniPay)
-- **Styling:** Vanilla CSS, CSS Modules
+## 🚀 Core Features
+
+### 🤝 Trustless Savings Circles
+Deploy or join custom circles with immutable parameters:
+- **Flexible Amounts:** Set contributions from 1 to 1000+ cUSD.
+- **Custom Cadence:** Daily, Weekly, or Monthly rounds.
+- **Transparency:** Real-time visibility into member contributions and upcoming payouts.
+
+### ⛏️ ChamaMiner Rig
+An innovative gamified staking protocol:
+- **Passive Yield:** Stake CHMT to mine **yCHAMA** tokens.
+- **Hardware Upgrades:** Burn tokens to upgrade your rig (LITE 1.5x, PRO 3.0x).
+- **Visual Feedback:** Interactive dashboard showing real-time yield accumulation.
+
+### 🏆 Reputation & Leaderboards
+- **On-Chain Identity:** Your savings habits are your resume.
+- **Daily Quests:** Streak-based rewards for consistent ecosystem interaction.
+- **Global Ranks:** Compete with the most reliable savers in the ecosystem.
+
+---
+
+## 🛠 Technology Stack
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | Next.js 15+, React 19, Three.js (3D Logo) |
+| **Blockchain** | Celo Mainnet / Alfajores |
+| **Contracts** | Solidity, Hardhat, OpenZeppelin |
+| **Web3** | Wagmi, Viem, Privy Auth |
+| **Styling** | Vanilla CSS (Premium Glassmorphism Design) |
+
+---
+
+## 📐 System Architecture
+```mermaid
+graph TD
+    User((User)) -->|Connect| Privy[Privy Auth / MiniPay]
+    Privy -->|Connect| App[ChamaVault DApp]
+    App -->|Create/Join| CV_Contract[ChamaVault Smart Contract]
+    App -->|Stake/Mine| CM_Contract[ChamaMiner Smart Contract]
+    CV_Contract -->|Stablecoin| cUSD[Celo cUSD]
+    CM_Contract -->|Rewards| yCHAMA[yCHAMA Token]
+```
 
 ---
 
 ## ⚙️ Quick Start
 
-### 1. Clone the repository
+### 1. Installation
 ```bash
 git clone https://github.com/Earnwithalee7890/ChamaVault.git
 cd chamavault
-```
-
-### 2. Install dependencies
-```bash
 npm install
 ```
 
-### 3. Set up environment variables
-Create a `.env` file in the root directory:
-```env
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x...
-NEXT_PUBLIC_MINER_ADDRESS=0x...
-NEXT_PUBLIC_CUSD_ADDRESS=0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
+### 2. Configuration
+Copy `.env.example` to `.env` and fill in your details:
+```bash
+cp .env.example .env
 ```
 
-### 4. Run the development server
+### 3. Development
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ---
 
-## 📜 Smart Contract Deployment
-
-To deploy the `ChamaVault` and `ChamaMiner` contracts to the Celo testnet:
-
-```bash
-npx hardhat run scripts/deploy.js --network alfajores
-```
-*(Make sure you have your private key configured in `hardhat.config.js`)*
+## 📜 Contract Addresses (Celo Mainnet)
+- **ChamaVault:** `0x...`
+- **ChamaMiner:** `0x...`
+- **ChamaQuests:** `0x...`
 
 ---
 
-## 🏆 Celo Proof of Ship Goals
-- Demonstrates real-world utility by bringing a culturally significant financial practice on-chain.
-- Leverages Celo's mobile-first ecosystem (MiniPay).
-- Uses stablecoins (cUSD) for predictable financial planning.
+## 🏆 Celo Proof of Ship
+ChamaVault is designed to showcase the power of Celo's mobile-first, stable-asset ecosystem. By combining culturally relevant financial practices with cutting-edge DeFi primitives, we are building the future of community finance.
 
----
 Built with ❤️ by the ChamaVault Team.
