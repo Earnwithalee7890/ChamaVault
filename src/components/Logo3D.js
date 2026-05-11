@@ -159,6 +159,30 @@ export default function Logo3D({ size = 300, showText = false, interactive = tru
     halo.position.z = 0.35;
     vaultGroup.add(halo);
 
+    // Protective Shield Sphere
+    const shieldGeo = new THREE.SphereGeometry(2.8, 32, 32);
+    const shieldMat = new THREE.MeshStandardMaterial({
+      color: emerald,
+      transparent: true,
+      opacity: 0.05,
+      side: THREE.DoubleSide,
+      metalness: 1.0,
+      roughness: 0,
+    });
+    const shield = new THREE.Mesh(shieldGeo, shieldMat);
+    vaultGroup.add(shield);
+
+    // Shield Hexagon Wireframe
+    const hexGeo = new THREE.IcosahedronGeometry(2.82, 2);
+    const hexMat = new THREE.MeshBasicMaterial({
+      color: emerald,
+      transparent: true,
+      opacity: 0.1,
+      wireframe: true,
+    });
+    const hexShield = new THREE.Mesh(hexGeo, hexMat);
+    vaultGroup.add(hexShield);
+
     mainGroup.add(vaultGroup);
 
     /* ======================================== */
@@ -357,6 +381,13 @@ export default function Logo3D({ size = 300, showText = false, interactive = tru
 
       // Rim glow animation
       rimMat.emissiveIntensity = 0.3 + Math.sin(t * 1.8) * 0.2;
+
+      // Shield animation
+      shield.rotation.y = t * 0.2;
+      shield.rotation.z = t * 0.1;
+      hexShield.rotation.y = -t * 0.15;
+      hexShield.rotation.x = t * 0.05;
+      hexMat.opacity = 0.05 + Math.sin(t * 1.5) * 0.05;
 
       // Orbiting nodes
       orbitGroup.rotation.z = t * 0.12;
