@@ -20,6 +20,7 @@ import {
   CATEGORIES,
   CELO_CHAIN_ID,
 } from "@/config/contracts";
+import StatCard from "@/components/StatCard";
 
 const TOKEN = CUSD_ADDRESS; // Switch to CUSD_ADDRESS for mainnet
 const STATES = ["Forming", "Active", "Completed"];
@@ -768,89 +769,164 @@ function MiningView() {
         <p>Deposit CHMT into the mining machine and passively earn yCHAMA tokens.</p>
       </div>
 
-      <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
-        <div className="glass-card" style={{ padding: 40, border: "1px solid rgba(52, 211, 153, 0.3)", boxShadow: "0 10px 40px rgba(52, 211, 153, 0.1)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <span style={{ fontSize: 40 }}>⛏️</span>
-              <div>
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 28, margin: 0 }}>yCHAMA Mining Rig</h3>
-                <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: 0 }}>Active Subscription</p>
-              </div>
-            </div>
-            <div style={{ background: "rgba(52, 211, 153, 0.15)", border: "1px solid #34d399", color: "#34d399", padding: "8px 16px", borderRadius: 12, fontWeight: 800, letterSpacing: 1 }}>
-              {tierName} TIER ({multiplier})
-            </div>
-          </div>
-          
-          <div style={{ padding: 32, background: "rgba(0,0,0,0.3)", borderRadius: 16, textAlign: "center", border: "1px inset rgba(255,255,255,0.05)", marginBottom: 24 }}>
-            <div style={{ color: "var(--text-muted)", fontSize: 14, textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>Pending yCHAMA Yield</div>
-            <div style={{ fontFamily: "monospace", fontSize: 48, color: "var(--accent-emerald)", fontWeight: 800, textShadow: miningActive ? "0 0 20px rgba(52,211,153,0.6)" : "none" }}>
-              {visualMinedAmount.toFixed(6)}
-            </div>
-            {miningActive ? (
-              <div style={{ fontSize: 14, color: "var(--accent-emerald)", marginTop: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <span className="pulse-dot"></span>
-                Mining in progress (Staked: {formatUnits(stakedBalance || 0n, 18)} CHMT)
-              </div>
-            ) : (
-              <div style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 12 }}>
-                Not mining. Stake CHMT to start.
-              </div>
-            )}
-          </div>
+      <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+          <StatCard 
+            label="Current Tier" 
+            value={tierName} 
+            subValue={`Multiplier: ${multiplier}`}
+            icon="💎"
+            variant={currentTier > 0 ? "emerald" : "default"}
+          />
+          <StatCard 
+            label="Staked Balance" 
+            value={`${formatUnits(stakedBalance || 0n, 18)} CHMT`}
+            icon="💰"
+          />
+          <StatCard 
+            label="Mining Status" 
+            value={miningActive ? "RUNNING" : "IDLE"}
+            subValue={miningActive ? "Earning yCHAMA" : "Stake to start"}
+            icon={miningActive ? "⚡" : "💤"}
+            variant={miningActive ? "emerald" : "default"}
+          />
+        </div>
 
-          <div style={{ display: "flex", gap: 16, marginBottom: 32 }}>
-            <button 
-              className="btn btn-primary" 
-              onClick={handleDepositMine}
-              disabled={isPending}
-              style={{ flex: 1, justifyContent: "center", padding: "16px", fontSize: 16 }}
-            >
-              💰 Stake 10 CHMT
-            </button>
-            <button 
-              className="btn btn-secondary" 
-              onClick={handleHarvest}
-              disabled={!miningActive || isPending}
-              style={{ flex: 1, justifyContent: "center", padding: "16px", fontSize: 16 }}
-            >
-              🌾 Harvest Yield
-            </button>
-          </div>
-          
-          <div style={{ paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-            <h4 style={{ fontSize: 18, fontFamily: "var(--font-display)", marginBottom: 16 }}>Rig Upgrades</h4>
-            <p style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 16 }}>Boost your mining speed by permanently upgrading your machine tier using CHMT.</p>
-            <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
-               <button 
-                className="btn" 
-                onClick={() => handleUpgrade(1)}
-                disabled={currentTier >= 1 || isPending}
-                style={{ flex: 1, padding: "12px", background: currentTier >= 1 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.2)", color: "white", cursor: currentTier >= 1 ? "not-allowed" : "pointer", opacity: currentTier >= 1 ? 0.5 : 1 }}
+        <div className="glass-card" style={{ padding: 40, border: "1px solid rgba(52, 211, 153, 0.3)", position: "relative", overflow: "hidden" }}>
+          <div className="rig-glow"></div>
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{ padding: 48, background: "rgba(0,0,0,0.4)", borderRadius: 24, textAlign: "center", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 32, backdropFilter: "blur(10px)" }}>
+              <div style={{ color: "var(--text-muted)", fontSize: 13, textTransform: "uppercase", letterSpacing: 3, marginBottom: 12, fontWeight: 700 }}>Accumulated Yield</div>
+              <div style={{ fontFamily: "monospace", fontSize: 64, color: "var(--accent-emerald)", fontWeight: 800, textShadow: miningActive ? "0 0 30px rgba(52,211,153,0.4)" : "none", letterSpacing: -2 }}>
+                {visualMinedAmount.toFixed(6)}
+              </div>
+              <div style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 8 }}>yCHAMA Tokens</div>
+            </div>
+
+            <div style={{ display: "flex", gap: 16, marginBottom: 40 }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleDepositMine}
+                disabled={isPending}
+                style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16 }}
               >
-                🚀 LITE TIER (1.5x) - 10 CHMT
+                📥 Stake 10 CHMT
               </button>
               <button 
-                className="btn" 
-                onClick={() => handleUpgrade(2)}
-                disabled={currentTier >= 2 || isPending}
-                style={{ flex: 1, padding: "12px", background: currentTier >= 2 ? "rgba(251, 191, 36, 0.1)" : "rgba(251, 191, 36, 0.2)", border: "1px solid rgba(251, 191, 36, 0.4)", color: "#fbbf24", cursor: currentTier >= 2 ? "not-allowed" : "pointer", opacity: currentTier >= 2 ? 0.5 : 1 }}
+                className="btn btn-secondary" 
+                onClick={handleHarvest}
+                disabled={!miningActive || isPending}
+                style={{ flex: 1, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16 }}
               >
-                🔥 PRO TIER (3x) - 50 CHMT
+                🌾 Harvest
               </button>
             </div>
-            <button 
-                className="btn btn-secondary" 
-                onClick={() => handleApprove(parseUnits("100", 18))}
-                disabled={approving}
-                style={{ width: "100%", padding: "12px", fontSize: 14 }}
-            >
-                {approving ? "⏳ Approving CHMT..." : "✅ Step 1: Approve CHMT for Staking/Upgrades"}
-            </button>
+            
+            <div style={{ paddingTop: 32, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <h4 style={{ fontSize: 20, fontFamily: "var(--font-display)", fontWeight: 700 }}>Hardware Upgrades</h4>
+                <button 
+                    className="btn-text" 
+                    onClick={() => handleApprove(parseUnits("100", 18))}
+                    disabled={approving}
+                    style={{ background: 'none', border: 'none', color: 'var(--accent-emerald)', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}
+                >
+                    {approving ? "Approving..." : "Step 1: Approve CHMT →"}
+                </button>
+              </div>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div className={`upgrade-box ${currentTier >= 1 ? 'owned' : ''}`}>
+                  <div className="upgrade-header">
+                    <span className="upgrade-icon">🚀</span>
+                    <span className="upgrade-title">Lite Rig</span>
+                  </div>
+                  <div className="upgrade-meta">
+                    <span className="multiplier">1.5x Boost</span>
+                    <span className="price">10 CHMT</span>
+                  </div>
+                  <button 
+                    className="upgrade-btn" 
+                    onClick={() => handleUpgrade(1)}
+                    disabled={currentTier >= 1 || isPending}
+                  >
+                    {currentTier >= 1 ? "OWNED" : "UPGRADE"}
+                  </button>
+                </div>
+
+                <div className={`upgrade-box pro ${currentTier >= 2 ? 'owned' : ''}`}>
+                  <div className="upgrade-header">
+                    <span className="upgrade-icon">🔥</span>
+                    <span className="upgrade-title">Pro Rig</span>
+                  </div>
+                  <div className="upgrade-meta">
+                    <span className="multiplier">3.0x Boost</span>
+                    <span className="price">50 CHMT</span>
+                  </div>
+                  <button 
+                    className="upgrade-btn" 
+                    onClick={() => handleUpgrade(2)}
+                    disabled={currentTier >= 2 || isPending}
+                  >
+                    {currentTier >= 2 ? "OWNED" : "UPGRADE"}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .rig-glow {
+          position: absolute;
+          top: -100px;
+          right: -100px;
+          width: 300px;
+          height: 300px;
+          background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, transparent 70%);
+          z-index: 0;
+        }
+        .upgrade-box {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid var(--border-glass);
+          border-radius: 20px;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          transition: 0.3s;
+        }
+        .upgrade-box:hover:not(.owned) {
+          border-color: rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.05);
+        }
+        .upgrade-box.owned {
+          border-color: rgba(52, 211, 153, 0.3);
+          background: rgba(52, 211, 153, 0.05);
+        }
+        .upgrade-box.pro.owned {
+          border-color: rgba(251, 191, 36, 0.3);
+          background: rgba(251, 191, 36, 0.05);
+        }
+        .upgrade-header { display: flex; align-items: center; gap: 10px; }
+        .upgrade-title { font-weight: 700; font-size: 16px; }
+        .upgrade-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); }
+        .upgrade-btn {
+          margin-top: 8px;
+          padding: 10px;
+          border-radius: 12px;
+          border: none;
+          background: var(--bg-primary);
+          color: white;
+          font-weight: 700;
+          cursor: pointer;
+          transition: 0.2s;
+        }
+        .owned .upgrade-btn { background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald); cursor: default; }
+        .upgrade-box:not(.owned) .upgrade-btn:hover { background: white; color: black; }
+        .pro:not(.owned) .upgrade-btn { color: var(--accent-gold); border: 1px solid rgba(251, 191, 36, 0.3); }
+      `}</style>
     </>
   );
 }
