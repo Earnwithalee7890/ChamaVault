@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 
 const HeroScene = dynamic(() => import("@/components/HeroScene"), { ssr: false });
 const Logo3D = dynamic(() => import("@/components/Logo3D"), { ssr: false });
+const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
 
 /* ---- Intersection Observer Hook ---- */
 function useAnimateIn() {
@@ -93,14 +94,6 @@ const steps = [
 ];
 
 export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const featuresRef = useAnimateIn();
   const stepsRef = useAnimateIn();
   const circlesRef = useAnimateIn();
@@ -109,23 +102,7 @@ export default function Home() {
 
   return (
     <>
-      {/* ===== NAVBAR ===== */}
-      <nav className={`navbar ${scrolled ? "scrolled" : ""}`} id="navbar">
-        <div className="navbar-inner">
-          <a href="#" className="navbar-logo" id="nav-logo">
-            <img src="/logo.png" alt="ChamaVault" style={{ width: 40, height: 40, borderRadius: 10 }} />
-            ChamaVault
-          </a>
-          <ul className="navbar-links">
-            <li><a href="#features" id="nav-features">Features</a></li>
-            <li><a href="#how-it-works" id="nav-how">How It Works</a></li>
-            <li><a href="#circles" id="nav-circles">Live Circles</a></li>
-          </ul>
-          <div className="navbar-actions">
-            <a href="/app" className="btn btn-primary" id="nav-launch-btn">Launch App</a>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ===== HERO ===== */}
       <section className="hero" id="hero">
