@@ -52,51 +52,89 @@ export function Web3Provider({ children }) {
           <ToastContext.Provider value={addToast}>
             {children}
             {/* Toast container */}
-            <div
-              style={{
-                position: "fixed",
-                bottom: 24,
-                right: 24,
-                zIndex: 9999,
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-              }}
-            >
+            <div className="toast-container">
               {toasts.map((t) => (
-                <div
-                  key={t.id}
-                  style={{
-                    padding: "14px 24px",
-                    borderRadius: 12,
-                    background:
-                      t.type === "success"
-                        ? "rgba(52,211,153,0.15)"
-                        : t.type === "error"
-                        ? "rgba(251,113,133,0.15)"
-                        : "rgba(255,255,255,0.08)",
-                    border: `1px solid ${
-                      t.type === "success"
-                        ? "rgba(52,211,153,0.3)"
-                        : t.type === "error"
-                        ? "rgba(251,113,133,0.3)"
-                        : "rgba(255,255,255,0.15)"
-                    }`,
-                    backdropFilter: "blur(20px)",
-                    color: "#f0f4ff",
-                    fontSize: 14,
-                    fontWeight: 500,
-                    maxWidth: 360,
-                    animation: "fadeInUp 0.3s ease",
-                  }}
-                >
-                  {t.type === "success" && "✅ "}
-                  {t.type === "error" && "❌ "}
-                  {t.type === "info" && "ℹ️ "}
-                  {t.msg}
+                <div key={t.id} className={`toast-item ${t.type}`}>
+                  <div className="toast-icon">
+                    {t.type === "success" && "✨"}
+                    {t.type === "error" && "⚠️"}
+                    {t.type === "info" && "ℹ️"}
+                  </div>
+                  <div className="toast-content">
+                    <div className="toast-message">{t.msg}</div>
+                  </div>
+                  <div className="toast-progress"></div>
                 </div>
               ))}
             </div>
+
+            <style jsx>{`
+              .toast-container {
+                position: fixed;
+                bottom: 32px;
+                right: 32px;
+                zIndex: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                pointer-events: none;
+              }
+              .toast-item {
+                pointer-events: auto;
+                min-width: 320px;
+                max-width: 420px;
+                background: rgba(17, 24, 39, 0.85);
+                backdrop-filter: blur(20px);
+                border: 1px solid var(--border-glass);
+                padding: 16px 20px;
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                position: relative;
+                overflow: hidden;
+                animation: toastIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+              }
+              .toast-icon {
+                font-size: 20px;
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                background: rgba(255,255,255,0.05);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .success { border-color: rgba(52, 211, 153, 0.3); }
+              .success .toast-icon { background: rgba(52, 211, 153, 0.1); }
+              .error { border-color: rgba(251, 113, 133, 0.3); }
+              .error .toast-icon { background: rgba(251, 113, 133, 0.1); }
+              
+              .toast-content { flex: 1; }
+              .toast-message { font-size: 14px; color: var(--text-primary); font-weight: 500; }
+              
+              .toast-progress {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                height: 3px;
+                background: var(--gradient-primary);
+                width: 100%;
+                animation: progress 5s linear forwards;
+                opacity: 0.6;
+              }
+              .error .toast-progress { background: var(--accent-rose); }
+              
+              @keyframes toastIn {
+                from { opacity: 0; transform: translateX(50px) scale(0.9); }
+                to { opacity: 1; transform: translateX(0) scale(1); }
+              }
+              @keyframes progress {
+                from { width: 100%; }
+                to { width: 0%; }
+              }
+            `}</style>
           </ToastContext.Provider>
         </WagmiProvider>
       </QueryClientProvider>
