@@ -939,8 +939,8 @@ function RewardsView() {
   const { switchChain } = useSwitchChain();
 
   const [tasks, setTasks] = useState([
-    { id: 1, title: "Follow @ChamaVault on X", reward: "+50 XP", done: false, link: "https://twitter.com" },
-    { id: 2, title: "Retweet Launch Post", reward: "+30 XP", done: false, link: "https://twitter.com" },
+    { id: 1, title: "Follow @aleeasghar78 on X", reward: "+50 XP", done: false, link: "https://x.com/aleeasghar78" },
+    { id: 2, title: "Retweet & Like Launch Post", reward: "+30 XP", done: false, link: "https://x.com/aleeasghar78/status/2056114384179704298?s=20" },
     { id: 3, title: "Join Discord Community", reward: "+40 XP", done: false, link: "https://discord.com" },
   ]);
 
