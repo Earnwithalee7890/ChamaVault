@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 const HeroScene = dynamic(() => import("@/components/HeroScene"), { ssr: false });
 const Logo3D = dynamic(() => import("@/components/Logo3D"), { ssr: false });
 const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
+import SocialConnect from "@/components/SocialConnect";
 
 /* ---- Intersection Observer Hook ---- */
 function useAnimateIn() {
@@ -142,6 +143,13 @@ export default function Home() {
   const trustRef = useAnimateIn();
   const ctaRef = useAnimateIn();
 
+  const [isMiniPay, setIsMiniPay] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.ethereum?.isMiniPay) {
+      setIsMiniPay(true);
+    }
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -149,7 +157,7 @@ export default function Home() {
 
       {/* ===== HERO ===== */}
       <section className="hero" id="hero">
-        <HeroScene />
+        {!isMiniPay && <HeroScene />}
         <div className="container hero-content hero-split">
           <div className="hero-text-side">
             <div className="hero-badge">
@@ -189,7 +197,11 @@ export default function Home() {
             </div>
           </div>
           <div className="hero-logo-side">
-            <Logo3D size={380} showText={true} interactive={true} />
+            {isMiniPay ? (
+              <img src="/icon.png" alt="ChamaVault Logo" style={{ width: 200, height: 200, borderRadius: 20 }} />
+            ) : (
+              <Logo3D size={380} showText={true} interactive={true} />
+            )}
           </div>
         </div>
       </section>
@@ -232,8 +244,21 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== SOCIAL CONNECT BOOSTER ===== */}
+      <section className="section" id="social-connect">
+        <div className="container">
+          <div className="section-header">
+            <h2><span className="text-gradient">No Wallets?</span> No Problem.</h2>
+            <p>Built for the real world. Invite friends to your circle using just their phone number via Celo SocialConnect.</p>
+          </div>
+          <div className="animate-in" ref={circlesRef}>
+            <SocialConnect />
+          </div>
+        </div>
+      </section>
+
       {/* ===== LIVE CIRCLES ===== */}
-      <section className="section" id="circles">
+      <section className="section" id="circles" style={{ background: "rgba(17,24,39,0.4)" }}>
         <div className="container">
           <div className="section-header">
             <h2>Live <span className="text-gradient">Circles</span></h2>
@@ -313,7 +338,11 @@ export default function Home() {
           </div>
           <div className="logo-showcase animate-in" ref={ctaRef}>
             <div className="logo-showcase-3d">
-              <Logo3D size={420} showText={true} interactive={true} />
+              {isMiniPay ? (
+                 <img src="/icon.png" alt="ChamaVault Logo" style={{ width: 200, height: 200, borderRadius: 20 }} />
+              ) : (
+                 <Logo3D size={420} showText={true} interactive={true} />
+              )}
             </div>
             <div className="logo-showcase-details">
               <div className="glass-card" style={{ padding: '28px' }}>
