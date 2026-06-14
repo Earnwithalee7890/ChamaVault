@@ -1,5 +1,6 @@
 import "./globals.css";
 import MiniPayBanner from "../components/MiniPayBanner";
+import AIAssistant from "../components/AIAssistant";
 
 export const metadata = {
   title: "ChamaVault — Trustless Savings Circles on Celo",
@@ -40,6 +41,7 @@ export default function RootLayout({ children }) {
       <body>
         <MiniPayBanner />
         {children}
+        <AIAssistant />
       </body>
     </html>
   );
