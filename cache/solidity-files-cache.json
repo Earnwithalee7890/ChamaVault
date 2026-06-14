@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "F:\\celo may\\chamavault\\contracts\\ChamaVault.sol": {
-      "lastModificationDate": 1778173972341,
-      "contentHash": "18899f045e264ff51ce75b0c0c35896d",
+      "lastModificationDate": 1781451311660,
+      "contentHash": "d7860b5d4d0fed47dfa3859435725d29",
       "sourceName": "contracts/ChamaVault.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -37,7 +37,8 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "ChamaVault"
+        "ChamaVault",
+        "IMoolaMarket"
       ]
     },
     "F:\\celo may\\chamavault\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {

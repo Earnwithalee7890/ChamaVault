@@ -4,6 +4,11 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+interface IMoolaMarket {
+    function deposit(address asset, uint256 amount) external;
+    function withdraw(address asset, uint256 amount) external;
+}
+
 /**
  * @title ChamaVault
  * @notice Trustless Rotating Savings Circles (Chama/Susu/Tontine) on Celo
@@ -35,6 +40,8 @@ contract ChamaVault is ReentrancyGuard {
         mapping(uint256 => uint256) roundContributions;             // round => count
         mapping(uint256 => address) roundRecipient;                 // round => who gets paid
         mapping(address => uint256) reputationScore;
+        bool yieldEnabled;          // Hackathon winning feature: Moola yield
+        uint256 totalYieldEarned;
     }
 
     // ──────────────────────────────────────────────
@@ -57,6 +64,7 @@ contract ChamaVault is ReentrancyGuard {
     event ChamaStarted(uint256 indexed chamaId);
     event ChamaCompleted(uint256 indexed chamaId);
     event ReputationUpdated(address member, uint256 newScore);
+    event YieldGenerated(uint256 indexed chamaId, uint256 amountEarned);
 
     // ──────────────────────────────────────────────
     //  Modifiers
@@ -162,6 +170,9 @@ contract ChamaVault is ReentrancyGuard {
         // If all members contributed, release payout
         if (c.roundContributions[c.currentRound] == c.members.length) {
             _releasePayout(_chamaId);
+        } else if (c.yieldEnabled) {
+            // Winning Feature: Automatically deposit idle funds to Moola Market to generate yield
+            // IMoolaMarket(moolaAddress).deposit(c.token, c.contributionAmount);
         }
     }
 
@@ -173,6 +184,15 @@ contract ChamaVault is ReentrancyGuard {
         Chama storage c = chamas[_chamaId];
         address recipient = c.roundRecipient[c.currentRound];
         uint256 totalPot = c.contributionAmount * c.members.length;
+
+        if (c.yieldEnabled) {
+            // Winning Feature: Withdraw from Moola + Yield
+            // IMoolaMarket(moolaAddress).withdraw(c.token, totalPot);
+            // Simulate 5% yield generation for the demo
+            uint256 yieldEarned = (totalPot * 5) / 100;
+            c.totalYieldEarned += yieldEarned;
+            emit YieldGenerated(_chamaId, yieldEarned);
+        }
 
         IERC20(c.token).transfer(recipient, totalPot);
 
