@@ -158,7 +158,7 @@ export default function Home() {
             </div>
             <h1>
               Save Together,<br />
-              <span className="text-gradient-hero">Grow Together.</span>
+              <span className="animated-gradient-text" style={{ fontWeight: 900 }}>Grow Together.</span>
             </h1>
             <p>
               Africa&apos;s centuries-old rotating savings tradition — now trustless, transparent,
@@ -166,7 +166,7 @@ export default function Home() {
               handle the trust.
             </p>
             <div className="hero-actions">
-              <a href="/app" className="btn btn-primary" id="hero-create-btn">
+              <a href="/app" className="btn btn-primary shimmer-btn" id="hero-create-btn">
                 ✨ Create a Circle
               </a>
               <a href="/app" className="btn btn-secondary" id="hero-join-btn">
@@ -337,13 +337,13 @@ export default function Home() {
       <section className="cta-section animate-in" ref={ctaRef} id="cta">
         <div className="container">
           <h2>
-            Ready to <span className="text-gradient-hero">Save Smarter</span>?
+            Ready to <span className="animated-gradient-text">Save Smarter</span>?
           </h2>
           <p>
             Join thousands of members across Africa building wealth together — one circle at a time.
           </p>
           <div className="hero-actions" style={{ justifyContent: "center" }}>
-            <a href="/app" className="btn btn-primary" id="cta-create-btn">
+            <a href="/app" className="btn btn-primary shimmer-btn" id="cta-create-btn">
               🚀 Create Your Circle Now
             </a>
             <a href="https://docs.celo.org" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" id="cta-learn-btn">
