@@ -24,8 +24,11 @@ export default function MiniPayBanner() {
       fontSize: "13px",
       fontWeight: "600",
       letterSpacing: "0.02em",
-      zIndex: 1000,
-      position: "relative"
+      zIndex: 2000,
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      right: 0
     }}>
       {isMiniPay 
         ? "✨ Operating in MiniPay environment! Celo network optimized."
