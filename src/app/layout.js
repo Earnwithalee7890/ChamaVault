@@ -1,4 +1,5 @@
 import "./globals.css";
+import MiniPayBanner from "../components/MiniPayBanner";
 
 export const metadata = {
   title: "ChamaVault — Trustless Savings Circles on Celo",
@@ -36,7 +37,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <MiniPayBanner />
+        {children}
+      </body>
     </html>
   );
 }
