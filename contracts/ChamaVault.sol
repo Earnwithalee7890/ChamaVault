@@ -42,6 +42,9 @@ contract ChamaVault is ReentrancyGuard {
         mapping(address => uint256) reputationScore;
         bool yieldEnabled;          // Hackathon winning feature: Moola yield
         uint256 totalYieldEarned;
+        mapping(address => mapping(address => bool)) kickVotes;     // Required feature: Governance voting member => voter => voted
+        mapping(address => uint256) kickVotesCount;
+        mapping(address => bool) isKicked;
     }
 
     // ──────────────────────────────────────────────
@@ -65,6 +68,8 @@ contract ChamaVault is ReentrancyGuard {
     event ChamaCompleted(uint256 indexed chamaId);
     event ReputationUpdated(address member, uint256 newScore);
     event YieldGenerated(uint256 indexed chamaId, uint256 amountEarned);
+    event MemberKicked(uint256 indexed chamaId, address member);
+    event KickVoteCast(uint256 indexed chamaId, address voter, address target);
 
     // ──────────────────────────────────────────────
     //  Modifiers
@@ -167,12 +172,52 @@ contract ChamaVault is ReentrancyGuard {
         emit ContributionMade(_chamaId, c.currentRound, msg.sender, c.contributionAmount);
         emit ReputationUpdated(msg.sender, globalReputation[msg.sender]);
 
-        // If all members contributed, release payout
-        if (c.roundContributions[c.currentRound] == c.members.length) {
+        // If all active members contributed, release payout
+        uint256 activeMembers = 0;
+        for (uint256 i = 0; i < c.members.length; i++) {
+            if (!c.isKicked[c.members[i]]) {
+                activeMembers++;
+            }
+        }
+
+        if (c.roundContributions[c.currentRound] >= activeMembers) {
             _releasePayout(_chamaId);
         } else if (c.yieldEnabled) {
             // Winning Feature: Automatically deposit idle funds to Moola Market to generate yield
             // IMoolaMarket(moolaAddress).deposit(c.token, c.contributionAmount);
+        }
+    }
+
+    /**
+     * @notice Required feature: Governance voting to kick a defaulting member
+     */
+    function voteToKick(uint256 _chamaId, address _memberToKick) external chamaExists(_chamaId) onlyMember(_chamaId) {
+        Chama storage c = chamas[_chamaId];
+        require(c.state == ChamaState.Active, "Chama not active");
+        require(_isMember(_chamaId, _memberToKick), "Target is not a member");
+        require(!c.isKicked[_memberToKick], "Member already kicked");
+        require(!c.kickVotes[_memberToKick][msg.sender], "Already voted to kick this member");
+
+        c.kickVotes[_memberToKick][msg.sender] = true;
+        c.kickVotesCount[_memberToKick]++;
+
+        emit KickVoteCast(_chamaId, msg.sender, _memberToKick);
+
+        // Required majority to kick (e.g., > 50%)
+        uint256 activeMembers = 0;
+        for (uint256 i = 0; i < c.members.length; i++) {
+            if (!c.isKicked[c.members[i]]) activeMembers++;
+        }
+
+        if (c.kickVotesCount[_memberToKick] > activeMembers / 2) {
+            c.isKicked[_memberToKick] = true;
+            // Penalty: reduce reputation drastically
+            if (globalReputation[_memberToKick] >= 5) {
+                globalReputation[_memberToKick] -= 5;
+            } else {
+                globalReputation[_memberToKick] = 0;
+            }
+            emit MemberKicked(_chamaId, _memberToKick);
         }
     }
 
