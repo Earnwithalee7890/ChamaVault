@@ -18,6 +18,12 @@ export default function WalletConnect() {
     }
   }, []);
 
+  useEffect(() => {
+    if (isMiniPay && !isConnected && mounted) {
+      connect({ connector: injected({ target: "metaMask" }) });
+    }
+  }, [isMiniPay, isConnected, mounted, connect]);
+
   if (!mounted) {
     return <div style={{ width: 150, height: 40, background: "rgba(255,255,255,0.05)", borderRadius: 10 }}></div>;
   }
