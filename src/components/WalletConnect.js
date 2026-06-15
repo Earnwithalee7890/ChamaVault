@@ -28,6 +28,22 @@ export default function WalletConnect() {
     return <div style={{ width: 150, height: 40, background: "rgba(255,255,255,0.05)", borderRadius: 10 }}></div>;
   }
 
+  if (isMiniPay) {
+    if (isConnected && wagmiAddress) {
+      const displayAddress = `${wagmiAddress.slice(0, 6)}...${wagmiAddress.slice(-4)}`;
+      return (
+        <button className="btn btn-secondary" style={{ padding: "8px 16px", fontSize: 14 }}>
+          {displayAddress}
+        </button>
+      );
+    }
+    return (
+      <button className="btn btn-primary" onClick={() => connect({ connector: injected({ target: "metaMask" }) })} style={{ padding: "8px 16px", fontSize: 14 }}>
+        Connect MiniPay
+      </button>
+    );
+  }
+
   if (authenticated && user) {
     // Determine the primary wallet address
     const address = user.wallet?.address || "";
