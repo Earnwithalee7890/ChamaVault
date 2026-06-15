@@ -6,9 +6,17 @@ import { useState, useEffect } from "react";
 
 export default function WalletConnect() {
   const { login, authenticated, user, logout } = usePrivy();
+  const { connect } = useConnect();
+  const { address: wagmiAddress, isConnected } = useAccount();
+  const [isMiniPay, setIsMiniPay] = useState(false);
   const [mounted, setMounted] = useState(false);
   
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined" && window.ethereum?.isMiniPay) {
+      setIsMiniPay(true);
+    }
+  }, []);
 
   if (!mounted) {
     return <div style={{ width: 150, height: 40, background: "rgba(255,255,255,0.05)", borderRadius: 10 }}></div>;
