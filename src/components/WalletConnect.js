@@ -1,5 +1,7 @@
 "use client";
 import { usePrivy } from "@privy-io/react-auth";
+import { useConnect, useAccount } from "wagmi";
+import { injected } from "wagmi/connectors";
 import { useState, useEffect } from "react";
 
 export default function WalletConnect() {
