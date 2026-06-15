@@ -87,10 +87,20 @@ npm run dev
 
 ---
 
-## 📜 Contract Addresses (Celo Mainnet)
-- **ChamaVault:** `0x...`
-- **ChamaMiner:** `0x...`
-- **ChamaQuests:** `0x...`
+## 📜 Smart Contract Deployment & Verification (Celo Mainnet)
+
+To qualify for the **Proof of Ship** campaign, contracts must be deployed to Celo Mainnet and verified on Celoscan:
+
+1. **Deploy to Celo Mainnet:**
+   ```bash
+   npx hardhat run scripts/deploy.js --network celo
+   ```
+2. **Verify Contracts:**
+   ```bash
+   npx hardhat verify --network celo <DEPLOYED_CONTRACT_ADDRESS> [CONSTRUCTOR_ARGUMENTS]
+   ```
+3. **Configure Environment:**
+   Fill in the verified addresses in your `.env` file under the respective fields (`NEXT_PUBLIC_CONTRACT_ADDRESS`, etc.) to sync them with your frontend.
 
 ---
 
