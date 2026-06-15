@@ -4,6 +4,7 @@ import { WagmiProvider, createConfig } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { celoAlfajores, celoMainnet } from "@/config/contracts";
 import { http } from "wagmi";
+import { injected } from "wagmi/connectors";
 import { createContext, useContext, useState } from "react";
 
 const queryClient = new QueryClient();
