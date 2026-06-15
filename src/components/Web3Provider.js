@@ -11,6 +11,9 @@ const queryClient = new QueryClient();
 
 const wagmiConfig = createConfig({
   chains: [celoMainnet, celoAlfajores],
+  connectors: [
+    injected({ target: "metaMask" }),
+  ],
   transports: {
     [celoMainnet.id]: http(),
     [celoAlfajores.id]: http(),
