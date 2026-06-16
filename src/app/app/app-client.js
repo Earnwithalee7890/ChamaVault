@@ -634,7 +634,7 @@ function MiningView() {
     functionName: "userTiers",
     args: address ? [address] : undefined,
     chainId: CELO_CHAIN_ID,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 3000 },
   });
 
   const { data: stakedBalance, refetch: refetchBalance } = useReadContract({
@@ -643,7 +643,7 @@ function MiningView() {
     functionName: "balances",
     args: address ? [address] : undefined,
     chainId: CELO_CHAIN_ID,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 3000 },
   });
 
   const { data: pendingRewardsData, refetch: refetchRewards } = useReadContract({
@@ -652,7 +652,7 @@ function MiningView() {
     functionName: "pendingRewards",
     args: address ? [address] : undefined,
     chainId: CELO_CHAIN_ID,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 3000 },
   });
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
@@ -661,7 +661,7 @@ function MiningView() {
     functionName: "allowance",
     args: address ? [address, CHAMAMINER_ADDRESS] : undefined,
     chainId: CELO_CHAIN_ID,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 3000 },
   });
 
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
@@ -684,7 +684,7 @@ function MiningView() {
     functionName: "balanceOf",
     args: address ? [address] : undefined,
     chainId: CELO_CHAIN_ID,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 3000 },
   });
 
   useEffect(() => {
@@ -789,6 +789,7 @@ function MiningView() {
     });
   };
 
+  const userCHMTBalance = tokenBalance ? Number(formatUnits(tokenBalance, 18)) : 0;
   const miningActive = stakedBalance && Number(stakedBalance) > 0;
   const currentTier = userTierData !== undefined ? Number(userTierData) : 0;
   const tierName = currentTier === 2 ? "PRO" : currentTier === 1 ? "LITE" : "FREE";
@@ -865,7 +866,15 @@ function MiningView() {
               >
                 {faucetMinting ? "⏳ Minting..." : "🚰 Faucet: Get 100 CHMT"}
               </button>
-              {allowance !== undefined && allowance < parseUnits("10", 18) ? (
+              {userCHMTBalance < 10 ? (
+                <button 
+                  className="btn btn-primary" 
+                  disabled
+                  style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16, background: "rgba(255, 255, 255, 0.05)", color: "var(--text-muted)", cursor: "not-allowed" }}
+                >
+                  ❌ Need 10 CHMT Balance
+                </button>
+              ) : allowance !== undefined && allowance < parseUnits("10", 18) ? (
                 <button 
                   className="btn btn-primary" 
                   onClick={() => handleApprove(parseUnits("10", 18))}
@@ -917,13 +926,32 @@ function MiningView() {
                     <span className="multiplier">1.5x Boost</span>
                     <span className="price">10 CHMT</span>
                   </div>
-                  <button 
-                    className="upgrade-btn" 
-                    onClick={() => handleUpgrade(1)}
-                    disabled={currentTier >= 1 || isPending}
-                  >
-                    {currentTier >= 1 ? "OWNED" : "UPGRADE"}
-                  </button>
+                  {currentTier >= 1 ? (
+                    <button className="upgrade-btn" disabled>
+                      OWNED
+                    </button>
+                  ) : userCHMTBalance < 10 ? (
+                    <button className="upgrade-btn" disabled style={{ opacity: 0.6, cursor: "not-allowed" }}>
+                      ❌ Need 10 CHMT
+                    </button>
+                  ) : allowance !== undefined && allowance < parseUnits("10", 18) ? (
+                    <button 
+                      className="upgrade-btn approve-needed" 
+                      onClick={() => handleApprove(parseUnits("10", 18))}
+                      disabled={approving}
+                      style={{ background: "rgba(52, 211, 153, 0.15)", color: "var(--accent-emerald)", border: "1px solid var(--accent-emerald)" }}
+                    >
+                      {approving ? "⏳ Approving..." : "✅ Step 1: Approve 10 CHMT"}
+                    </button>
+                  ) : (
+                    <button 
+                      className="upgrade-btn" 
+                      onClick={() => handleUpgrade(1)}
+                      disabled={isPending}
+                    >
+                      {isPending ? "⏳ Upgrading..." : "📥 Step 2: Buy Lite Rig"}
+                    </button>
+                  )}
                 </div>
 
                 <div className={`upgrade-box pro ${currentTier >= 2 ? 'owned' : ''}`}>
@@ -935,13 +963,32 @@ function MiningView() {
                     <span className="multiplier">3.0x Boost</span>
                     <span className="price">50 CHMT</span>
                   </div>
-                  <button 
-                    className="upgrade-btn" 
-                    onClick={() => handleUpgrade(2)}
-                    disabled={currentTier >= 2 || isPending}
-                  >
-                    {currentTier >= 2 ? "OWNED" : "UPGRADE"}
-                  </button>
+                  {currentTier >= 2 ? (
+                    <button className="upgrade-btn" disabled>
+                      OWNED
+                    </button>
+                  ) : userCHMTBalance < 50 ? (
+                    <button className="upgrade-btn" disabled style={{ opacity: 0.6, cursor: "not-allowed" }}>
+                      ❌ Need 50 CHMT
+                    </button>
+                  ) : allowance !== undefined && allowance < parseUnits("50", 18) ? (
+                    <button 
+                      className="upgrade-btn approve-needed" 
+                      onClick={() => handleApprove(parseUnits("50", 18))}
+                      disabled={approving}
+                      style={{ background: "rgba(251, 191, 36, 0.15)", color: "var(--accent-gold)", border: "1px solid var(--accent-gold)" }}
+                    >
+                      {approving ? "⏳ Approving..." : "✅ Step 1: Approve 50 CHMT"}
+                    </button>
+                  ) : (
+                    <button 
+                      className="upgrade-btn" 
+                      onClick={() => handleUpgrade(2)}
+                      disabled={isPending}
+                    >
+                      {isPending ? "⏳ Upgrading..." : "📥 Step 2: Buy Pro Rig"}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
