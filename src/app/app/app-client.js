@@ -655,16 +655,37 @@ function MiningView() {
     query: { enabled: !!address },
   });
 
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    address: TOKEN,
+    abi: ERC20_ABI,
+    functionName: "allowance",
+    args: address ? [address, CHAMAMINER_ADDRESS] : undefined,
+    chainId: CELO_CHAIN_ID,
+    query: { enabled: !!address },
+  });
+
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
   const { isSuccess, error: txError } = useWaitForTransactionReceipt({ hash: txHash });
 
+  const { writeContract: writeFaucet, data: faucetTx, isPending: faucetMinting, error: faucetError } = useWriteContract();
+  const { isSuccess: faucetSuccess, error: faucetTxError } = useWaitForTransactionReceipt({ hash: faucetTx });
+
   useEffect(() => {
-    const error = writeError || txError;
+    const error = writeError || txError || faucetError || faucetTxError;
     if (error) {
       console.error("Mining Error:", error);
       toast(error.shortMessage || error.message || "Mining action failed", "error");
     }
-  }, [writeError, txError]);
+  }, [writeError, txError, faucetError, faucetTxError]);
+
+  const { data: tokenBalance, refetch: refetchTokenBalance } = useReadContract({
+    address: TOKEN,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
+    query: { enabled: !!address },
+  });
 
   useEffect(() => {
     if (isSuccess) {
@@ -672,15 +693,46 @@ function MiningView() {
       refetchTier();
       refetchBalance();
       refetchRewards();
+      refetchAllowance();
+      refetchTokenBalance();
     }
   }, [isSuccess]);
 
   const { writeContract: writeApprove, data: approveTx, isPending: approving } = useWriteContract();
   const { isSuccess: approveSuccess } = useWaitForTransactionReceipt({ hash: approveTx });
-  useEffect(() => { if (approveSuccess) toast("cUSD approved! Now confirm your action.", "success"); }, [approveSuccess]);
+
+  useEffect(() => {
+    if (approveSuccess) {
+      toast("CHMT approved! Now confirm your action.", "success");
+      refetchAllowance();
+      refetchTokenBalance();
+    }
+  }, [approveSuccess]);
+
+  useEffect(() => {
+    if (faucetSuccess) {
+      toast("100 CHMT requested from Faucet! 🎉", "success");
+      refetchTokenBalance();
+    }
+  }, [faucetSuccess]);
 
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
+
+  const handleMintFaucet = async () => {
+    if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+    }
+    const mintAmount = parseUnits("100", 18);
+    writeFaucet({
+      address: TOKEN,
+      abi: ERC20_ABI,
+      functionName: "mint",
+      args: [address, mintAmount],
+      chainId: CELO_CHAIN_ID,
+    });
+  };
 
   const handleApprove = async (amount) => {
     if (chainId !== CELO_CHAIN_ID) {
@@ -781,6 +833,7 @@ function MiningView() {
           <StatCard 
             label="Staked Balance" 
             value={`${formatUnits(stakedBalance || 0n, 18)} CHMT`}
+            subValue={`Wallet Balance: ${tokenBalance ? Number(formatUnits(tokenBalance, 18)).toFixed(2) : "0.00"} CHMT`}
             icon="💰"
           />
           <StatCard 
@@ -803,15 +856,34 @@ function MiningView() {
               <div style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 8 }}>yCHAMA Tokens</div>
             </div>
 
-            <div style={{ display: "flex", gap: 16, marginBottom: 40 }}>
+            <div style={{ display: "flex", gap: 16, marginBottom: 40, flexWrap: "wrap" }}>
               <button 
-                className="btn btn-primary" 
-                onClick={handleDepositMine}
-                disabled={isPending}
-                style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16 }}
+                className="btn btn-secondary" 
+                onClick={handleMintFaucet}
+                disabled={faucetMinting}
+                style={{ flex: 1, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16, border: "1px dashed var(--accent-emerald)" }}
               >
-                📥 Stake 10 CHMT
+                {faucetMinting ? "⏳ Minting..." : "🚰 Faucet: Get 100 CHMT"}
               </button>
+              {allowance !== undefined && allowance < parseUnits("10", 18) ? (
+                <button 
+                  className="btn btn-primary" 
+                  onClick={() => handleApprove(parseUnits("10", 18))}
+                  disabled={approving}
+                  style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16, background: "var(--accent-emerald)", color: "var(--bg-primary)" }}
+                >
+                  {approving ? "⏳ Approving..." : "✅ Step 1: Approve 10 CHMT"}
+                </button>
+              ) : (
+                <button 
+                  className="btn btn-primary" 
+                  onClick={handleDepositMine}
+                  disabled={isPending}
+                  style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16 }}
+                >
+                  {isPending ? "⏳ Staking..." : "📥 Step 2: Stake 10 CHMT"}
+                </button>
+              )}
               <button 
                 className="btn btn-secondary" 
                 onClick={handleHarvest}
@@ -1138,18 +1210,15 @@ function TokenSaleView() {
   const { writeContract: writeApprove, data: approveTx, isPending: approving, error: approveError } = useWriteContract();
   const { isSuccess: approveSuccess, error: approveTxError } = useWaitForTransactionReceipt({ hash: approveTx });
 
-  const { sendTransaction, data: celoTx, isPending: sendingCelo, error: celoError } = useSendTransaction();
-  const { isSuccess: celoSuccess, error: celoTxError } = useWaitForTransactionReceipt({ hash: celoTx });
-
   useEffect(() => {
-    const error = buyError || approveError || celoError || buyTxError || approveTxError || celoTxError;
+    const error = buyError || approveError || buyTxError || approveTxError;
     if (error) {
       console.error("Token Sale Error:", error);
       toast(error.shortMessage || error.message || "Purchase failed", "error");
     }
-  }, [buyError, approveError, celoError, buyTxError, approveTxError, celoTxError]);
+  }, [buyError, approveError, buyTxError, approveTxError]);
 
-  const { data: totalSold } = useReadContract({
+  const { data: totalSold, refetch: refetchTotalSold } = useReadContract({
     address: CHAMASALE_ADDRESS,
     abi: CHAMASALE_ABI,
     functionName: "totalChamaSold",
@@ -1163,9 +1232,14 @@ function TokenSaleView() {
     chainId: CELO_CHAIN_ID,
   });
 
-  useEffect(() => { if (buySuccess) toast("CHAMA tokens purchased! 🎉💰", "success"); }, [buySuccess]);
+  useEffect(() => { 
+    if (buySuccess) {
+      toast("CHAMA tokens purchased! 🎉💰", "success");
+      refetchTotalSold?.();
+    }
+  }, [buySuccess]);
+  
   useEffect(() => { if (approveSuccess) toast("cUSD approved! Now click Buy.", "success"); }, [approveSuccess]);
-  useEffect(() => { if (celoSuccess) toast("CHAMA tokens purchased with CELO! 🎉", "success"); }, [celoSuccess]);
 
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
@@ -1207,10 +1281,11 @@ function TokenSaleView() {
     if (chainId !== CELO_CHAIN_ID) {
       try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
     }
-    sendTransaction({
-      to: CHAMASALE_ADDRESS,
+    writeBuy({
+      address: CHAMASALE_ADDRESS,
+      abi: CHAMASALE_ABI,
+      functionName: "buyWithCELO",
       value: parseUnits(celoEquivalent.toFixed(18), 18),
-      data: "0xd96a094a", // buyWithCELO() function selector
       chainId: CELO_CHAIN_ID,
     });
   };
@@ -1315,10 +1390,10 @@ function TokenSaleView() {
             <button
               className="btn btn-primary"
               onClick={handleBuyWithCELO}
-              disabled={sendingCelo}
+              disabled={buying}
               style={{ width: "100%", justifyContent: "center", padding: "16px", fontSize: 16 }}
             >
-              {sendingCelo ? "⏳ Sending CELO..." : `🟡 Buy ${chamaYouGet.toLocaleString()} CHAMA with CELO`}
+              {buying ? "⏳ Sending CELO..." : `🟡 Buy ${chamaYouGet.toLocaleString()} CHAMA with CELO`}
             </button>
           )}
         </div>
