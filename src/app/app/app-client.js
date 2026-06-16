@@ -796,22 +796,36 @@ function MiningView() {
   const multiplier = currentTier === 2 ? "3x" : currentTier === 1 ? "1.5x" : "1x";
 
   const baseMinedAmount = pendingRewardsData ? Number(formatUnits(pendingRewardsData, 18)) : 0;
+  const [lastReadTime, setLastReadTime] = useState(Date.now());
   const [visualMinedAmount, setVisualMinedAmount] = useState(baseMinedAmount);
 
   useEffect(() => {
     setVisualMinedAmount(baseMinedAmount);
-  }, [baseMinedAmount]);
+    setLastReadTime(Date.now());
+  }, [pendingRewardsData]);
 
   useEffect(() => {
     let interval;
     if (miningActive) {
       interval = setInterval(() => {
-        const multi = currentTier === 2 ? 3 : currentTier === 1 ? 1.5 : 1;
-        setVisualMinedAmount((prev) => prev + (0.00005 * multi * Number(formatUnits(stakedBalance||0n, 18))));
-      }, 1000);
+        const stakedUnits = Number(formatUnits(stakedBalance || 0n, 18));
+        const multi = currentTier === 2 ? 300 : currentTier === 1 ? 150 : 100;
+        const rewardRate = 500000;
+        const ratePerSecond = (stakedUnits * rewardRate * multi) / (100 * 1e18);
+        
+        const elapsedSeconds = (Date.now() - lastReadTime) / 1000;
+        setVisualMinedAmount(baseMinedAmount + ratePerSecond * elapsedSeconds);
+      }, 50); // update every 50ms for ultra-smooth counting!
+    } else {
+      setVisualMinedAmount(baseMinedAmount);
     }
     return () => clearInterval(interval);
-  }, [miningActive, stakedBalance, currentTier]);
+  }, [miningActive, stakedBalance, currentTier, baseMinedAmount, lastReadTime]);
+
+  const formattedYield = visualMinedAmount.toFixed(12);
+  const dotIndex = formattedYield.indexOf('.');
+  const integerPart = formattedYield.slice(0, dotIndex);
+  const fractionalPart = formattedYield.slice(dotIndex);
 
   return (
     <>
@@ -849,12 +863,27 @@ function MiningView() {
         <div className="glass-card" style={{ padding: 40, border: "1px solid rgba(52, 211, 153, 0.3)", position: "relative", overflow: "hidden" }}>
           <div className="rig-glow"></div>
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ padding: 48, background: "rgba(0,0,0,0.4)", borderRadius: 24, textAlign: "center", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 32, backdropFilter: "blur(10px)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: 13, textTransform: "uppercase", letterSpacing: 3, marginBottom: 12, fontWeight: 700 }}>Accumulated Yield</div>
-              <div style={{ fontFamily: "monospace", fontSize: 64, color: "var(--accent-emerald)", fontWeight: 800, textShadow: miningActive ? "0 0 30px rgba(52,211,153,0.4)" : "none", letterSpacing: -2 }}>
-                {visualMinedAmount.toFixed(6)}
+            <div style={{ padding: 40, background: "rgba(0,0,0,0.4)", borderRadius: 24, textAlign: "center", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 32, backdropFilter: "blur(10px)", position: "relative" }}>
+              <div className="mining-core-container">
+                <div className={`mining-core ${miningActive ? 'active' : 'idle'}`}>
+                  <div className="core-inner"></div>
+                  <div className="core-ring ring-1"></div>
+                  <div className="core-ring ring-2"></div>
+                  <div className="core-ring ring-3"></div>
+                </div>
               </div>
-              <div style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 8 }}>yCHAMA Tokens</div>
+              
+              <div style={{ color: "var(--text-muted)", fontSize: 13, textTransform: "uppercase", letterSpacing: 3, marginBottom: 12, fontWeight: 700 }}>Accumulated Yield</div>
+              <div style={{ fontFamily: "monospace", color: "var(--accent-emerald)", textShadow: miningActive ? "0 0 25px rgba(52,211,153,0.5)" : "none", letterSpacing: -1 }}>
+                <span style={{ fontSize: 56, fontWeight: 800 }}>{integerPart}</span>
+                <span style={{ fontSize: 32, color: "rgba(52,211,153,0.6)", fontWeight: 500 }}>{fractionalPart}</span>
+              </div>
+              <div style={{ fontSize: 14, color: "var(--text-secondary)", marginTop: 12, display: "flex", justifyContent: "center", alignItems: "center", gap: 6 }}>
+                <span>yCHAMA Tokens</span>
+                {miningActive && (
+                  <span className="live-badge">● LIVE</span>
+                )}
+              </div>
             </div>
 
             <div style={{ display: "flex", gap: 16, marginBottom: 40, flexWrap: "wrap" }}>
@@ -896,7 +925,7 @@ function MiningView() {
               <button 
                 className="btn btn-secondary" 
                 onClick={handleHarvest}
-                disabled={!miningActive || isPending}
+                disabled={visualMinedAmount <= 0 || isPending}
                 style={{ flex: 1, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16 }}
               >
                 🌾 Harvest
@@ -1007,44 +1036,174 @@ function MiningView() {
           z-index: 0;
         }
         .upgrade-box {
-          background: rgba(255,255,255,0.03);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.05) 100%);
           border: 1px solid var(--border-glass);
-          border-radius: 20px;
-          padding: 20px;
+          border-radius: var(--radius-lg);
+          padding: 24px;
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          transition: 0.3s;
+          gap: 16px;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+        }
+        .upgrade-box::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(52, 211, 153, 0.05), transparent);
+          opacity: 0;
+          transition: opacity 0.4s;
+          pointer-events: none;
         }
         .upgrade-box:hover:not(.owned) {
-          border-color: rgba(255,255,255,0.2);
-          background: rgba(255,255,255,0.05);
+          border-color: rgba(52, 211, 153, 0.25);
+          transform: translateY(-4px);
+          box-shadow: 0 10px 30px rgba(52, 211, 153, 0.1);
+        }
+        .upgrade-box:hover:not(.owned)::after {
+          opacity: 1;
         }
         .upgrade-box.owned {
-          border-color: rgba(52, 211, 153, 0.3);
-          background: rgba(52, 211, 153, 0.05);
+          border-color: rgba(52, 211, 153, 0.4);
+          background: linear-gradient(135deg, rgba(52, 211, 153, 0.04) 0%, rgba(52, 211, 153, 0.08) 100%);
+          box-shadow: 0 0 30px rgba(52, 211, 153, 0.1);
         }
         .upgrade-box.pro.owned {
-          border-color: rgba(251, 191, 36, 0.3);
-          background: rgba(251, 191, 36, 0.05);
+          border-color: rgba(251, 191, 36, 0.4);
+          background: linear-gradient(135deg, rgba(251, 191, 36, 0.04) 0%, rgba(251, 191, 36, 0.08) 100%);
+          box-shadow: 0 0 30px rgba(251, 191, 36, 0.1);
         }
-        .upgrade-header { display: flex; align-items: center; gap: 10px; }
-        .upgrade-title { font-weight: 700; font-size: 16px; }
-        .upgrade-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); }
+        .upgrade-header { display: flex; align-items: center; gap: 10px; z-index: 1; }
+        .upgrade-title { font-weight: 700; font-size: 16px; z-index: 1; }
+        .upgrade-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); z-index: 1; }
         .upgrade-btn {
           margin-top: 8px;
-          padding: 10px;
-          border-radius: 12px;
+          padding: 12px;
+          border-radius: 14px;
           border: none;
           background: var(--bg-primary);
           color: white;
           font-weight: 700;
           cursor: pointer;
-          transition: 0.2s;
+          transition: all 0.2s;
+          z-index: 1;
+          border: 1px solid var(--border-glass);
         }
-        .owned .upgrade-btn { background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald); cursor: default; }
-        .upgrade-box:not(.owned) .upgrade-btn:hover { background: white; color: black; }
+        .owned .upgrade-btn { background: rgba(52, 211, 153, 0.2); color: var(--accent-emerald); cursor: default; border-color: transparent; }
+        .upgrade-box:not(.owned) .upgrade-btn:hover { background: white; color: black; border-color: white; }
         .pro:not(.owned) .upgrade-btn { color: var(--accent-gold); border: 1px solid rgba(251, 191, 36, 0.3); }
+        .pro:not(.owned) .upgrade-btn:hover { background: var(--accent-gold); color: var(--bg-primary); border-color: var(--accent-gold); }
+
+        .mining-core-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-bottom: 20px;
+          height: 120px;
+        }
+        .mining-core {
+          position: relative;
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.5s ease;
+        }
+        .mining-core.active {
+          background: radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, transparent 70%);
+          animation: core-pulse 2s infinite alternate ease-in-out;
+        }
+        .mining-core.idle {
+          background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+          animation: core-pulse-idle 4s infinite alternate ease-in-out;
+        }
+        .core-inner {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          z-index: 2;
+          transition: all 0.5s ease;
+        }
+        .mining-core.active .core-inner {
+          background: var(--accent-emerald);
+          box-shadow: 0 0 20px var(--accent-emerald), 0 0 40px var(--accent-emerald);
+        }
+        .mining-core.idle .core-inner {
+          background: #6366f1;
+          box-shadow: 0 0 10px #6366f1;
+        }
+        .core-ring {
+          position: absolute;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 50%;
+          transition: all 0.5s ease;
+        }
+        .mining-core.active .core-ring {
+          border-color: rgba(52, 211, 153, 0.15);
+        }
+        .mining-core.idle .core-ring {
+          border-color: rgba(99, 102, 241, 0.05);
+        }
+        .ring-1 {
+          width: 48px;
+          height: 48px;
+        }
+        .mining-core.active .ring-1 {
+          animation: spin-clockwise 3s linear infinite;
+          border-top-color: var(--accent-emerald);
+          border-bottom-color: var(--accent-emerald);
+        }
+        .ring-2 {
+          width: 68px;
+          height: 68px;
+        }
+        .mining-core.active .ring-2 {
+          animation: spin-counter-clockwise 5s linear infinite;
+          border-left-color: var(--accent-emerald);
+          border-right-color: var(--accent-emerald);
+        }
+        .ring-3 {
+          width: 90px;
+          height: 90px;
+          border-style: dashed;
+        }
+        .mining-core.active .ring-3 {
+          animation: spin-clockwise 8s linear infinite;
+          border-color: rgba(52, 211, 153, 0.2);
+        }
+        .live-badge {
+          background: rgba(52, 211, 153, 0.15);
+          color: var(--accent-emerald);
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 1px;
+          animation: blink 1s infinite alternate;
+        }
+        @keyframes core-pulse {
+          0% { transform: scale(0.96); opacity: 0.9; }
+          100% { transform: scale(1.04); opacity: 1; }
+        }
+        @keyframes core-pulse-idle {
+          0% { transform: scale(0.98); opacity: 0.6; }
+          100% { transform: scale(1.02); opacity: 0.8; }
+        }
+        @keyframes spin-clockwise {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes spin-counter-clockwise {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
+        }
+        @keyframes blink {
+          0% { opacity: 0.4; }
+          100% { opacity: 1; }
+        }
       `}</style>
     </>
   );
