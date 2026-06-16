@@ -1,7 +1,7 @@
 "use client";
 import "./app.css";
 import { useState, useEffect, useCallback } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSendTransaction, useSwitchChain, useChainId } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSendTransaction, useSwitchChain } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
 import { Web3Provider, useToast } from "@/components/Web3Provider";
 import WalletConnect from "@/components/WalletConnect";
@@ -41,96 +41,181 @@ function AppNav({ view, setView }) {
   ];
 
   return (
-    <nav className={`navbar scrolled ${mobileMenuOpen ? "mobile-open" : ""}`} id="app-navbar">
-      <div className="navbar-inner">
-        <a href="/" className="navbar-logo" id="app-logo">
-          <img src="/logo.png" alt="ChamaVault" style={{ width: 40, height: 40, borderRadius: 10 }} />
-          <span>ChamaVault</span>
-        </a>
-        
-        <ul className={`navbar-links dashboard-nav ${mobileMenuOpen ? "active" : ""}`}>
-          {navItems.map((item) => (
-            <li key={item.id}>
-              <a 
-                href="#" 
-                onClick={(e) => { 
-                  e.preventDefault(); 
-                  setView(item.id); 
-                  setMobileMenuOpen(false); 
-                }} 
-                className={view === item.id ? "active" : ""}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span className="nav-label">{item.label}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
+    <>
+      <nav className={`navbar scrolled ${mobileMenuOpen ? "mobile-open" : ""}`} id="app-navbar">
+        <div className="navbar-inner">
+          <a href="/" className="navbar-logo" id="app-logo">
+            <img src="/logo.png" alt="ChamaVault" style={{ width: 40, height: 40, borderRadius: 10 }} />
+            <span>ChamaVault</span>
+          </a>
+          
+          <ul className={`navbar-links dashboard-nav ${mobileMenuOpen ? "active" : ""}`}>
+            {navItems.map((item) => (
+              <li key={item.id}>
+                <a 
+                  href="#" 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    setView(item.id); 
+                    setMobileMenuOpen(false); 
+                  }} 
+                  className={view === item.id ? "active" : ""}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
 
-        <div className="navbar-actions">
-          <WalletConnect />
-          <button 
-            className="mobile-menu-toggle" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className="bar"></span>
-            <span className="bar"></span>
-            <span className="bar"></span>
-          </button>
+          <div className="navbar-actions">
+            <WalletConnect />
+            <button 
+              className="mobile-menu-toggle" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className="bar"></span>
+              <span className="bar"></span>
+              <span className="bar"></span>
+            </button>
+          </div>
         </div>
-      </div>
-      <style jsx>{`
-        .dashboard-nav .nav-icon { margin-right: 8px; font-size: 16px; }
-        .dashboard-nav a.active { color: var(--accent-emerald) !important; font-weight: 700; }
-        
-        .mobile-menu-toggle {
-          display: none;
-          flex-direction: column;
-          gap: 6px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 4px;
-        }
-        .bar {
-          width: 24px;
-          height: 2px;
-          background: var(--text-primary);
-          transition: 0.3s;
-          border-radius: 2px;
-        }
-
-        @media (max-width: 1024px) {
-          .mobile-menu-toggle { display: flex; }
-          .navbar-links.dashboard-nav {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 80%;
-            height: 100vh;
-            background: var(--bg-primary);
+        <style jsx>{`
+          .dashboard-nav .nav-icon { margin-right: 8px; font-size: 16px; }
+          .dashboard-nav a.active { color: var(--accent-emerald) !important; font-weight: 700; }
+          
+          .mobile-menu-toggle {
+            display: none;
             flex-direction: column;
-            padding: 100px 40px;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-            z-index: 1000;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
           }
-          .navbar-links.dashboard-nav.active { right: 0; }
-          .navbar-links li { width: 100%; border-bottom: 1px solid var(--border-glass); padding: 10px 0; }
-          .mobile-open .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-          .mobile-open .bar:nth-child(2) { opacity: 0; }
-          .mobile-open .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-        }
-      `}</style>
-    </nav>
+          .bar {
+            width: 24px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: 0.3s;
+            border-radius: 2px;
+          }
+
+          .mobile-bottom-nav {
+            display: none;
+          }
+
+          @media (max-width: 768px) {
+            .mobile-bottom-nav {
+              display: flex;
+              position: fixed;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              height: 68px;
+              background: rgba(10, 14, 23, 0.88);
+              backdrop-filter: blur(20px);
+              -webkit-backdrop-filter: blur(20px);
+              border-top: 1px solid var(--border-glass);
+              justify-content: space-around;
+              align-items: center;
+              z-index: 1000;
+              padding: 0 8px;
+              box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+            }
+            .mobile-nav-item {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              color: var(--text-secondary);
+              text-decoration: none;
+              flex: 1;
+              height: 100%;
+              gap: 4px;
+              transition: all 0.2s;
+              font-size: 10px;
+              font-weight: 500;
+            }
+            .mobile-nav-item.active {
+              color: var(--accent-emerald);
+            }
+            .mobile-nav-icon {
+              font-size: 20px;
+              transition: transform 0.2s;
+            }
+            .mobile-nav-item.active .mobile-nav-icon {
+              transform: scale(1.15);
+            }
+            .mobile-nav-label {
+              font-family: var(--font-body);
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 100%;
+            }
+            
+            .mobile-menu-toggle {
+              display: none !important;
+            }
+            .navbar-links.dashboard-nav {
+              display: none !important;
+            }
+            :global(body) {
+              padding-bottom: 80px;
+            }
+          }
+
+          @media (min-width: 769px) and (max-width: 1024px) {
+            .mobile-menu-toggle { display: flex; }
+            .navbar-links.dashboard-nav {
+              position: fixed;
+              top: 0;
+              right: -100%;
+              width: 80%;
+              height: 100vh;
+              background: var(--bg-primary);
+              flex-direction: column;
+              padding: 100px 40px;
+              transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+              box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+              z-index: 1000;
+            }
+            .navbar-links.dashboard-nav.active { right: 0; }
+            .navbar-links li { width: 100%; border-bottom: 1px solid var(--border-glass); padding: 10px 0; }
+            .mobile-open .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .mobile-open .bar:nth-child(2) { opacity: 0; }
+            .mobile-open .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+          }
+        `}</style>
+      </nav>
+
+      {/* Bottom Navigation Bar for Mobile */}
+      <div className="mobile-bottom-nav">
+        {navItems.map((item) => (
+          <a 
+            key={item.id}
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setView(item.id);
+            }}
+            className={`mobile-nav-item ${view === item.id ? "active" : ""}`}
+          >
+            <span className="mobile-nav-icon">{item.icon}</span>
+            <span className="mobile-nav-label">{item.label}</span>
+          </a>
+        ))}
+      </div>
+    </>
   );
 }
 
 /* ===== Create Chama Form ===== */
 function CreateChamaForm({ onCreated }) {
   const toast = useToast();
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const [form, setForm] = useState({
     name: "",
     category: "general",
@@ -163,7 +248,6 @@ function CreateChamaForm({ onCreated }) {
     }
   }, [isSuccess]);
 
-  const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
   const handleCreate = async () => {
@@ -358,7 +442,7 @@ function ChamaCard({ chamaId, onSelect }) {
 /* ===== Circle Detail View ===== */
 function CircleDetail({ chamaId, onBack }) {
   const toast = useToast();
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
 
   const { data: info } = useReadContract({
     address: CHAMAVAULT_ADDRESS,
@@ -408,7 +492,6 @@ function CircleDetail({ chamaId, onBack }) {
   const isMember = members?.some((m) => m.toLowerCase() === address?.toLowerCase());
   const potSize = Number(formatUnits(contribution, 18)) * Number(maxMembers);
 
-  const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
   const handleJoin = async () => {
@@ -625,7 +708,7 @@ function LeaderboardView() {
 
 /* ===== Mining View ===== */
 function MiningView() {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const toast = useToast();
 
   const { data: userTierData, refetch: refetchTier } = useReadContract({
@@ -716,7 +799,6 @@ function MiningView() {
     }
   }, [faucetSuccess]);
 
-  const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
   const handleMintFaucet = async () => {
@@ -1308,9 +1390,8 @@ function MiningView() {
 
 /* ===== Quests / Rewards View ===== */
 function RewardsView() {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const toast = useToast();
-  const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
   const [tasks, setTasks] = useState([
@@ -1502,7 +1583,7 @@ function RewardsView() {
 
 /* ===== Token Sale View ===== */
 function TokenSaleView() {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const toast = useToast();
   const [buyAmount, setBuyAmount] = useState("1");
   const [buyMethod, setBuyMethod] = useState("cusd"); // "cusd" or "celo"
@@ -1544,7 +1625,6 @@ function TokenSaleView() {
   
   useEffect(() => { if (approveSuccess) toast("cUSD approved! Now click Buy.", "success"); }, [approveSuccess]);
 
-  const chainId = useChainId();
   const { switchChain } = useSwitchChain();
 
   const chamaYouGet = parseFloat(buyAmount || 0) * 10000;
