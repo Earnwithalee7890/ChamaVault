@@ -393,7 +393,9 @@ export default function Home() {
             <ul className="footer-links">
               <li><a href="#features">Features</a></li>
               <li><a href="#how-it-works">How It Works</a></li>
-              <li><a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+              <li><a href="/terms">Terms of Service</a></li>
+              <li><a href="/privacy">Privacy Policy</a></li>
+              <li><a href="https://github.com/Earnwithalee7890/ChamaVault" target="_blank" rel="noopener noreferrer">GitHub</a></li>
               <li><a href="https://t.me/proofofship" target="_blank" rel="noopener noreferrer">Telegram</a></li>
             </ul>
             <p className="footer-copy">
