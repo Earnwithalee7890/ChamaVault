@@ -827,6 +827,20 @@ function MiningView() {
   const integerPart = formattedYield.slice(0, dotIndex);
   const fractionalPart = formattedYield.slice(dotIndex);
 
+  const minerBtnStyle = {
+    flex: "1 1 200px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "56px",
+    fontSize: "15px",
+    fontWeight: "600",
+    borderRadius: "14px",
+    transition: "all 0.3s ease",
+    cursor: "pointer",
+    border: "none",
+  };
+
   return (
     <>
       <div className="section-header" style={{ marginBottom: 32 }}>
@@ -891,44 +905,91 @@ function MiningView() {
                 className="btn btn-secondary" 
                 onClick={handleMintFaucet}
                 disabled={faucetMinting}
-                style={{ flex: 1, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16, border: "1px dashed var(--accent-emerald)" }}
+                style={{ 
+                  ...minerBtnStyle, 
+                  border: "1px dashed var(--accent-emerald)",
+                  background: "rgba(52, 211, 153, 0.03)",
+                  color: "var(--accent-emerald)"
+                }}
               >
-                {faucetMinting ? "⏳ Minting..." : "🚰 Faucet: Get 100 CHMT"}
+                {faucetMinting ? "⏳ Minting..." : <>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
+                    <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z"/>
+                  </svg>
+                  Get 100 CHMT
+                </>}
               </button>
               {userCHMTBalance < 10 ? (
                 <button 
                   className="btn btn-primary" 
                   disabled
-                  style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16, background: "rgba(255, 255, 255, 0.05)", color: "var(--text-muted)", cursor: "not-allowed" }}
+                  style={{ 
+                    ...minerBtnStyle,
+                    background: "rgba(255, 255, 255, 0.04)", 
+                    color: "var(--text-muted)", 
+                    cursor: "not-allowed",
+                    border: "1px solid var(--border-glass)"
+                  }}
                 >
-                  ❌ Need 10 CHMT Balance
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                  Need 10 CHMT
                 </button>
               ) : allowance !== undefined && allowance < parseUnits("10", 18) ? (
                 <button 
                   className="btn btn-primary" 
                   onClick={() => handleApprove(parseUnits("10", 18))}
                   disabled={approving}
-                  style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16, background: "var(--accent-emerald)", color: "var(--bg-primary)" }}
+                  style={{ 
+                    ...minerBtnStyle, 
+                    background: "var(--accent-emerald)", 
+                    color: "#0a0e17",
+                    boxShadow: "0 4px 15px rgba(52, 211, 153, 0.25)"
+                  }}
                 >
-                  {approving ? "⏳ Approving..." : "✅ Step 1: Approve 10 CHMT"}
+                  {approving ? "⏳ Approving..." : <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Approve 10 CHMT
+                  </>}
                 </button>
               ) : (
                 <button 
                   className="btn btn-primary" 
                   onClick={handleDepositMine}
                   disabled={isPending}
-                  style={{ flex: 1.5, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16 }}
+                  style={{ 
+                    ...minerBtnStyle,
+                    background: "var(--gradient-primary)",
+                    color: "#0a0e17"
+                  }}
                 >
-                  {isPending ? "⏳ Staking..." : "📥 Step 2: Stake 10 CHMT"}
+                  {isPending ? "⏳ Staking..." : <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
+                      <path d="M12 5v14M19 12l-7 7-7-7"/>
+                    </svg>
+                    Stake 10 CHMT
+                  </>}
                 </button>
               )}
               <button 
                 className="btn btn-secondary" 
                 onClick={handleHarvest}
                 disabled={visualMinedAmount <= 0 || isPending}
-                style={{ flex: 1, justifyContent: "center", padding: "18px", fontSize: 18, borderRadius: 16 }}
+                style={{ 
+                  ...minerBtnStyle,
+                  border: "1px solid var(--border-glass)",
+                  background: visualMinedAmount > 0 ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.01)"
+                }}
               >
-                🌾 Harvest
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Harvest yCHAMA
               </button>
             </div>
             
@@ -957,11 +1018,19 @@ function MiningView() {
                   </div>
                   {currentTier >= 1 ? (
                     <button className="upgrade-btn" disabled>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
                       OWNED
                     </button>
                   ) : userCHMTBalance < 10 ? (
                     <button className="upgrade-btn" disabled style={{ opacity: 0.6, cursor: "not-allowed" }}>
-                      ❌ Need 10 CHMT
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                      </svg>
+                      Need 10 CHMT
                     </button>
                   ) : allowance !== undefined && allowance < parseUnits("10", 18) ? (
                     <button 
@@ -970,7 +1039,12 @@ function MiningView() {
                       disabled={approving}
                       style={{ background: "rgba(52, 211, 153, 0.15)", color: "var(--accent-emerald)", border: "1px solid var(--accent-emerald)" }}
                     >
-                      {approving ? "⏳ Approving..." : "✅ Step 1: Approve 10 CHMT"}
+                      {approving ? "⏳ Approving..." : <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Step 1: Approve 10 CHMT
+                      </>}
                     </button>
                   ) : (
                     <button 
@@ -978,7 +1052,12 @@ function MiningView() {
                       onClick={() => handleUpgrade(1)}
                       disabled={isPending}
                     >
-                      {isPending ? "⏳ Upgrading..." : "📥 Step 2: Buy Lite Rig"}
+                      {isPending ? "⏳ Upgrading..." : <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                          <path d="M12 5v14M19 12l-7 7-7-7"/>
+                        </svg>
+                        Step 2: Buy Lite Rig
+                      </>}
                     </button>
                   )}
                 </div>
@@ -994,11 +1073,19 @@ function MiningView() {
                   </div>
                   {currentTier >= 2 ? (
                     <button className="upgrade-btn" disabled>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
                       OWNED
                     </button>
                   ) : userCHMTBalance < 50 ? (
                     <button className="upgrade-btn" disabled style={{ opacity: 0.6, cursor: "not-allowed" }}>
-                      ❌ Need 50 CHMT
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                      </svg>
+                      Need 50 CHMT
                     </button>
                   ) : allowance !== undefined && allowance < parseUnits("50", 18) ? (
                     <button 
@@ -1007,7 +1094,12 @@ function MiningView() {
                       disabled={approving}
                       style={{ background: "rgba(251, 191, 36, 0.15)", color: "var(--accent-gold)", border: "1px solid var(--accent-gold)" }}
                     >
-                      {approving ? "⏳ Approving..." : "✅ Step 1: Approve 50 CHMT"}
+                      {approving ? "⏳ Approving..." : <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Step 1: Approve 50 CHMT
+                      </>}
                     </button>
                   ) : (
                     <button 
@@ -1015,7 +1107,12 @@ function MiningView() {
                       onClick={() => handleUpgrade(2)}
                       disabled={isPending}
                     >
-                      {isPending ? "⏳ Upgrading..." : "📥 Step 2: Buy Pro Rig"}
+                      {isPending ? "⏳ Upgrading..." : <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
+                          <path d="M12 5v14M19 12l-7 7-7-7"/>
+                        </svg>
+                        Step 2: Buy Pro Rig
+                      </>}
                     </button>
                   )}
                 </div>
