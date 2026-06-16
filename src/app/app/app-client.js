@@ -25,7 +25,18 @@ import StatCard from "@/components/StatCard";
 const TOKEN = CUSD_ADDRESS; // Switch to CUSD_ADDRESS for mainnet
 const STATES = ["Forming", "Active", "Completed"];
 
-/* ===== Navbar ===== */
+function getEffectiveChainId(wagmiChainId) {
+  if (typeof window !== "undefined" && window.ethereum?.chainId) {
+    try {
+      const parsed = parseInt(window.ethereum.chainId, 16);
+      if (!isNaN(parsed)) return parsed;
+    } catch (e) {
+      console.error("Failed to parse window.ethereum.chainId:", e);
+    }
+  }
+  return wagmiChainId;
+}
+
 /* ===== Navbar ===== */
 function AppNav({ view, setView }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -40,8 +51,23 @@ function AppNav({ view, setView }) {
     { id: "create", label: "Create", icon: "✨" },
   ];
 
+  const bottomNavItems = [
+    { id: "explore", label: "Explore", icon: "🧭" },
+    { id: "my", label: "Circles", icon: "🤝" },
+    { id: "rewards", label: "Quests", icon: "⚔️" },
+    { id: "mining", label: "Mining", icon: "⛏️" },
+  ];
+
   return (
     <>
+      {/* Sidebar Overlay Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       <nav className={`navbar scrolled ${mobileMenuOpen ? "mobile-open" : ""}`} id="app-navbar">
         <div className="navbar-inner">
           <a href="/" className="navbar-logo" id="app-logo">
@@ -106,6 +132,55 @@ function AppNav({ view, setView }) {
             display: none;
           }
 
+          .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 8, 15, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 998;
+            animation: fadeIn 0.2s ease-out forwards;
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+
+          @media (max-width: 1024px) {
+            .mobile-menu-toggle {
+              display: flex;
+            }
+            .navbar-links.dashboard-nav {
+              position: fixed;
+              top: 0;
+              right: -100%;
+              width: 280px;
+              height: 100vh;
+              background: #0d121f;
+              flex-direction: column;
+              padding: 100px 32px;
+              transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+              box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+              z-index: 999;
+              border-left: 1px solid var(--border-glass);
+            }
+            .navbar-links.dashboard-nav.active {
+              right: 0;
+            }
+            .navbar-links li {
+              width: 100%;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+              padding: 12px 0;
+            }
+            .mobile-open .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .mobile-open .bar:nth-child(2) { opacity: 0; }
+            .mobile-open .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+          }
+
           @media (max-width: 768px) {
             .mobile-bottom-nav {
               display: flex;
@@ -113,15 +188,15 @@ function AppNav({ view, setView }) {
               bottom: 0;
               left: 0;
               right: 0;
-              height: 68px;
-              background: rgba(10, 14, 23, 0.88);
-              backdrop-filter: blur(20px);
-              -webkit-backdrop-filter: blur(20px);
+              height: calc(72px + env(safe-area-inset-bottom, 0px));
+              background: rgba(10, 14, 23, 0.92);
+              backdrop-filter: blur(25px);
+              -webkit-backdrop-filter: blur(25px);
               border-top: 1px solid var(--border-glass);
               justify-content: space-around;
               align-items: center;
-              z-index: 1000;
-              padding: 0 8px;
+              z-index: 997;
+              padding: 0 8px calc(env(safe-area-inset-bottom, 0px) + 2px) 8px;
               box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
             }
             .mobile-nav-item {
@@ -155,58 +230,42 @@ function AppNav({ view, setView }) {
               text-overflow: ellipsis;
               max-width: 100%;
             }
-            
-            .mobile-menu-toggle {
-              display: none !important;
-            }
-            .navbar-links.dashboard-nav {
-              display: none !important;
-            }
             :global(body) {
-              padding-bottom: 80px;
+              padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
             }
-          }
-
-          @media (min-width: 769px) and (max-width: 1024px) {
-            .mobile-menu-toggle { display: flex; }
-            .navbar-links.dashboard-nav {
-              position: fixed;
-              top: 0;
-              right: -100%;
-              width: 80%;
-              height: 100vh;
-              background: var(--bg-primary);
-              flex-direction: column;
-              padding: 100px 40px;
-              transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-              box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-              z-index: 1000;
-            }
-            .navbar-links.dashboard-nav.active { right: 0; }
-            .navbar-links li { width: 100%; border-bottom: 1px solid var(--border-glass); padding: 10px 0; }
-            .mobile-open .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-            .mobile-open .bar:nth-child(2) { opacity: 0; }
-            .mobile-open .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
           }
         `}</style>
       </nav>
 
       {/* Bottom Navigation Bar for Mobile */}
       <div className="mobile-bottom-nav">
-        {navItems.map((item) => (
+        {bottomNavItems.map((item) => (
           <a 
             key={item.id}
             href="#"
             onClick={(e) => {
               e.preventDefault();
               setView(item.id);
+              setMobileMenuOpen(false);
             }}
-            className={`mobile-nav-item ${view === item.id ? "active" : ""}`}
+            className={`mobile-nav-item ${view === item.id && !mobileMenuOpen ? "active" : ""}`}
           >
             <span className="mobile-nav-icon">{item.icon}</span>
             <span className="mobile-nav-label">{item.label}</span>
           </a>
         ))}
+        {/* Burger menu trigger on bottom nav */}
+        <a 
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            setMobileMenuOpen(!mobileMenuOpen);
+          }}
+          className={`mobile-nav-item ${mobileMenuOpen ? "active" : ""}`}
+        >
+          <span className="mobile-nav-icon">☰</span>
+          <span className="mobile-nav-label">Menu</span>
+        </a>
       </div>
     </>
   );
@@ -215,7 +274,8 @@ function AppNav({ view, setView }) {
 /* ===== Create Chama Form ===== */
 function CreateChamaForm({ onCreated }) {
   const toast = useToast();
-  const { address, chainId } = useAccount();
+  const { address, chainId: wagmiChainId } = useAccount();
+  const chainId = getEffectiveChainId(wagmiChainId);
   const [form, setForm] = useState({
     name: "",
     category: "general",
@@ -255,7 +315,13 @@ function CreateChamaForm({ onCreated }) {
     if (!form.name.trim()) return toast("Enter a circle name", "error");
 
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to create your circle.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
 
     const fullName = `[${form.category}] ${form.name}`;
@@ -442,7 +508,8 @@ function ChamaCard({ chamaId, onSelect }) {
 /* ===== Circle Detail View ===== */
 function CircleDetail({ chamaId, onBack }) {
   const toast = useToast();
-  const { address, chainId } = useAccount();
+  const { address, chainId: wagmiChainId } = useAccount();
+  const chainId = getEffectiveChainId(wagmiChainId);
 
   const { data: info } = useReadContract({
     address: CHAMAVAULT_ADDRESS,
@@ -497,7 +564,13 @@ function CircleDetail({ chamaId, onBack }) {
   const handleJoin = async () => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to join.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeJoin({
       address: CHAMAVAULT_ADDRESS,
@@ -510,7 +583,13 @@ function CircleDetail({ chamaId, onBack }) {
 
   const handleApprove = async () => {
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to approve.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeApprove({
       address: TOKEN,
@@ -523,7 +602,13 @@ function CircleDetail({ chamaId, onBack }) {
 
   const handleContribute = async () => {
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to contribute.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeContribute({
       address: CHAMAVAULT_ADDRESS,
@@ -708,7 +793,8 @@ function LeaderboardView() {
 
 /* ===== Mining View ===== */
 function MiningView() {
-  const { address, chainId } = useAccount();
+  const { address, chainId: wagmiChainId } = useAccount();
+  const chainId = getEffectiveChainId(wagmiChainId);
   const toast = useToast();
 
   const { data: userTierData, refetch: refetchTier } = useReadContract({
@@ -804,7 +890,13 @@ function MiningView() {
   const handleMintFaucet = async () => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to request faucet.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     const mintAmount = parseUnits("100", 18);
     writeFaucet({
@@ -818,7 +910,13 @@ function MiningView() {
 
   const handleApprove = async (amount) => {
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to approve.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeApprove({
       address: TOKEN,
@@ -832,7 +930,13 @@ function MiningView() {
   const handleDepositMine = async () => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to stake.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     const depositAmount = parseUnits("10", 18); 
     writeContract({
@@ -847,7 +951,13 @@ function MiningView() {
   const handleHarvest = async () => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to harvest.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeContract({
       address: CHAMAMINER_ADDRESS,
@@ -860,7 +970,13 @@ function MiningView() {
   const handleUpgrade = async (tier) => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to buy rig.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeContract({
       address: CHAMAMINER_ADDRESS,
@@ -1390,7 +1506,8 @@ function MiningView() {
 
 /* ===== Quests / Rewards View ===== */
 function RewardsView() {
-  const { address, chainId } = useAccount();
+  const { address, chainId: wagmiChainId } = useAccount();
+  const chainId = getEffectiveChainId(wagmiChainId);
   const toast = useToast();
   const { switchChain } = useSwitchChain();
 
@@ -1449,9 +1566,11 @@ function RewardsView() {
     if (chainId !== CELO_CHAIN_ID) {
       try {
         await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to check in.", "success");
       } catch (err) {
-        return toast("Please switch to Celo Mainnet", "error");
+        toast("Please switch to Celo Mainnet", "error");
       }
+      return;
     }
 
     writeContract({
@@ -1583,7 +1702,8 @@ function RewardsView() {
 
 /* ===== Token Sale View ===== */
 function TokenSaleView() {
-  const { address, chainId } = useAccount();
+  const { address, chainId: wagmiChainId } = useAccount();
+  const chainId = getEffectiveChainId(wagmiChainId);
   const toast = useToast();
   const [buyAmount, setBuyAmount] = useState("1");
   const [buyMethod, setBuyMethod] = useState("cusd"); // "cusd" or "celo"
@@ -1634,7 +1754,13 @@ function TokenSaleView() {
   const handleApproveCUSD = async () => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to approve.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeApprove({
       address: REAL_CUSD_ADDRESS,
@@ -1648,7 +1774,13 @@ function TokenSaleView() {
   const handleBuyWithCUSD = async () => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to buy CHAMA.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeBuy({
       address: CHAMASALE_ADDRESS,
@@ -1662,7 +1794,13 @@ function TokenSaleView() {
   const handleBuyWithCELO = async () => {
     if (!address) return toast("Connect wallet first", "error");
     if (chainId !== CELO_CHAIN_ID) {
-      try { await switchChain({ chainId: CELO_CHAIN_ID }); } catch (e) { return toast("Switch to Celo Mainnet", "error"); }
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to buy CHAMA.", "success");
+      } catch (e) {
+        toast("Switch to Celo Mainnet", "error");
+      }
+      return;
     }
     writeBuy({
       address: CHAMASALE_ADDRESS,
