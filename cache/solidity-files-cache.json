@@ -1177,8 +1177,8 @@
       ]
     },
     "F:\\celo may\\chamavault\\contracts\\ConsistencyStreakNFT.sol": {
-      "lastModificationDate": 1781728443986,
-      "contentHash": "22ccdf4782916f732ee79fa486f97fcc",
+      "lastModificationDate": 1781729189324,
+      "contentHash": "5ee807bec3aeab1026b9f71b5857bfb8",
       "sourceName": "contracts/ConsistencyStreakNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1208,8 +1208,6 @@
       "imports": [
         "@openzeppelin/contracts/token/ERC721/ERC721.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/metatx/ERC2771Context.sol",
-        "@openzeppelin/contracts/utils/Context.sol",
         "@openzeppelin/contracts/utils/Base64.sol",
         "@openzeppelin/contracts/utils/Strings.sol"
       ],

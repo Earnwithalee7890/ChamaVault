@@ -1,5 +1,9 @@
 require("@nomicfoundation/hardhat-ethers");
-require("@nomicfoundation/hardhat-verify");
+try {
+  require("@nomicfoundation/hardhat-verify");
+} catch (e) {
+  // Fallback for Node.js ESM strictness during local compile
+}
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */

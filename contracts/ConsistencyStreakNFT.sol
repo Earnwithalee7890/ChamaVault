@@ -3,8 +3,6 @@ pragma solidity ^0.8.20;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ERC2771Context} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -13,9 +11,9 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  * @notice Replaces generic, low-quality "daily check-ins" with a premium
  *         Consistency Streak Badge protocol. Users record their daily consistency
  *         and claim a free, dynamic on-chain badge NFT.
- *         Supports ERC-2771 for zero-fee gasless claiming via sponsored paymasters.
+ *         The contract is free to mint (zero developer fees); users only pay standard Celo network gas.
  */
-contract ConsistencyStreakNFT is ERC721, ERC2771Context, Ownable {
+contract ConsistencyStreakNFT is ERC721, Ownable {
     using Strings for uint256;
 
     struct BadgeData {
@@ -36,11 +34,9 @@ contract ConsistencyStreakNFT is ERC721, ERC2771Context, Ownable {
     mapping(address => UserStreak) public userStreaks;
 
     event BadgeClaimed(address indexed user, uint256 indexed tokenId, uint256 streak);
-    event TrustedForwarderUpdated(address indexed newForwarder);
 
-    constructor(address trustedForwarder) 
+    constructor() 
         ERC721("Consistency Streak Badge", "CSB") 
-        ERC2771Context(trustedForwarder)
         Ownable(msg.sender)
     {}
 
@@ -49,7 +45,7 @@ contract ConsistencyStreakNFT is ERC721, ERC2771Context, Ownable {
      * @dev Replaces typical boring "daily check-in" buttons with a Consistency Streak Badge NFT.
      */
     function recordConsistency() external returns (uint256) {
-        address user = _msgSender();
+        address user = msg.sender;
         UserStreak storage stats = userStreaks[user];
 
         // 20 hours enforces daily claim without strict 24 hour micro-management
@@ -191,18 +187,5 @@ contract ConsistencyStreakNFT is ERC721, ERC2771Context, Ownable {
             result[i - startIndex] = strBytes[i];
         }
         return string(result);
-    }
-
-    // ERC2771Context overrides to handle trusted gasless forwarder mapping
-    function _msgSender() internal view override(Context, ERC2771Context) returns (address) {
-        return ERC2771Context._msgSender();
-    }
-
-    function _msgData() internal view override(Context, ERC2771Context) returns (bytes calldata) {
-        return ERC2771Context._msgData();
-    }
-
-    function _contextSuffixLength() internal view override(Context, ERC2771Context) returns (uint256) {
-        return ERC2771Context._contextSuffixLength();
     }
 }
