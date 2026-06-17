@@ -1647,22 +1647,217 @@ function MiningView() {
 }
 
 /* ===== Quests / Rewards View ===== */
+
+// Live Dynamic SVG Badge Preview Component
+function NftBadgePreview({ streak, address }) {
+  let tierName = "Bronze Tier";
+  let color1 = "#b45309";
+  let color2 = "#78350f";
+
+  if (streak >= 100) {
+    tierName = "Legend Tier";
+    color1 = "#10b981";
+    color2 = "#06b6d4";
+  } else if (streak >= 30) {
+    tierName = "Diamond Tier";
+    color1 = "#22d3ee";
+    color2 = "#3b82f6";
+  } else if (streak >= 10) {
+    tierName = "Gold Tier";
+    color1 = "#fbbf24";
+    color2 = "#f59e0b";
+  } else if (streak >= 4) {
+    tierName = "Silver Tier";
+    color1 = "#9ca3af";
+    color2 = "#4b5563";
+  } else {
+    tierName = "Bronze Tier";
+    color1 = "#b45309";
+    color2 = "#78350f";
+  }
+
+  const shortAddress = address ? `${address.substring(0, 6)}...${address.substring(address.length - 4)}` : "0x000...0000";
+
+  return (
+    <div className="badge-preview-container" style={{
+      width: "100%",
+      maxWidth: "280px",
+      margin: "0 auto",
+      aspectRatio: "4/5",
+      borderRadius: "24px",
+      position: "relative",
+      overflow: "hidden",
+      boxShadow: `0 20px 40px rgba(0,0,0,0.5), 0 0 40px ${color1}20`,
+      border: "2px solid transparent",
+      backgroundImage: `linear-gradient(#0d121f, #0d121f), linear-gradient(135deg, ${color1}, ${color2})`,
+      backgroundOrigin: "border-box",
+      backgroundClip: "content-box, border-box",
+      transition: "all 0.5s ease"
+    }}>
+      {/* Glow effect */}
+      <div style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "140px",
+        height: "140px",
+        borderRadius: "50%",
+        background: `radial-gradient(circle, ${color1}30 0%, transparent 70%)`,
+        filter: "blur(20px)",
+        pointerEvents: "none",
+        zIndex: 1,
+        transition: "all 0.5s ease"
+      }} />
+
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        justifyContent: "space-between",
+        padding: "24px",
+        boxSizing: "border-box",
+        zIndex: 2,
+        position: "relative"
+      }}>
+        {/* Top Header */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            color: color1,
+            fontSize: "9px",
+            fontWeight: "800",
+            letterSpacing: "3px",
+            textTransform: "uppercase",
+            marginBottom: "4px"
+          }}>
+            CHAMAVAULT
+          </div>
+          <div style={{
+            color: "#ffffff",
+            fontSize: "13px",
+            fontWeight: "700",
+          }}>
+            Consistency Protocol
+          </div>
+        </div>
+
+        {/* Center Graphic */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "12px 0",
+          position: "relative"
+        }}>
+          {/* Ring */}
+          <div className="spinning-ring" style={{
+            width: "100px",
+            height: "100px",
+            borderRadius: "50%",
+            border: `2.5px dashed ${color1}50`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+          }} />
+          
+          <div style={{
+            position: "absolute",
+            width: "86px",
+            height: "86px",
+            borderRadius: "50%",
+            background: "#111827",
+            border: "1px solid rgba(255,255,255,0.05)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            {/* Checkmark icon */}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color1} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 0.5s ease" }}>
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        {/* Streak & Details */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            color: "#ffffff",
+            fontSize: "28px",
+            fontWeight: "900",
+            lineHeight: 1
+          }}>
+            {streak}
+          </div>
+          <div style={{
+            color: "#9ca3af",
+            fontSize: "9px",
+            fontWeight: "600",
+            letterSpacing: "1.5px",
+            marginTop: "2px",
+            marginBottom: "10px"
+          }}>
+            CONSECUTIVE DAYS
+          </div>
+
+          {/* Tier Label */}
+          <div style={{
+            display: "inline-block",
+            padding: "4px 12px",
+            borderRadius: "10px",
+            background: `linear-gradient(135deg, ${color1}25, ${color2}25)`,
+            border: `1.5px solid ${color1}40`,
+            color: "#ffffff",
+            fontSize: "10px",
+            fontWeight: "700"
+          }}>
+            {tierName}
+          </div>
+          
+          {/* Owner address */}
+          <div style={{
+            color: "#4b5563",
+            fontFamily: "monospace",
+            fontSize: "9px",
+            marginTop: "12px"
+          }}>
+            Owner: {shortAddress}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RewardsView() {
   const { address, chainId: wagmiChainId } = useAccount();
   const chainId = getEffectiveChainId(wagmiChainId);
   const toast = useToast();
   const { switchChain } = useSwitchChain();
-  const [modalOpen, setModalOpen] = useState(false);
+  
+  // Tab control
+  const [activeTab, setActiveTab] = useState("tokens"); // "tokens" or "nft"
 
+  // Modals for confirmations
+  const [modalOpen, setModalOpen] = useState(false);
+  const [nftModalOpen, setNftModalOpen] = useState(false);
+
+  // Bonus tasks list
   const [tasks, setTasks] = useState([
     { id: 1, title: "Follow @aleeasghar78 on X", reward: "+50 XP", done: false, link: "https://x.com/aleeasghar78" },
     { id: 2, title: "Retweet & Like Launch Post", reward: "+30 XP", done: false, link: "https://x.com/aleeasghar78/status/2056114384179704298?s=20" },
     { id: 3, title: "Join Discord Community", reward: "+40 XP", done: false, link: "https://discord.com" },
   ]);
 
+  // Hook for Daily Token Check-in (Original names!)
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
   const { isSuccess, error: txError } = useWaitForTransactionReceipt({ hash: txHash });
 
+  // Hook for Daily NFT Badge Claim
+  const { writeContract: writeNftCheck, data: nftTxHash, isPending: nftPending, error: nftWriteError } = useWriteContract();
+  const { isSuccess: nftSuccess, error: nftTxError } = useWaitForTransactionReceipt({ hash: nftTxHash });
+
+  // Error notifications for Token Check-in
   useEffect(() => {
     if (writeError) {
       console.error("Rewards Write Error:", writeError);
@@ -1674,6 +1869,19 @@ function RewardsView() {
     }
   }, [writeError, txError]);
 
+  // Error notifications for NFT Claim
+  useEffect(() => {
+    if (nftWriteError) {
+      console.error("NFT Claim Write Error:", nftWriteError);
+      toast(nftWriteError.shortMessage || nftWriteError.message || "NFT claim failed", "error");
+    }
+    if (nftTxError) {
+      console.error("NFT Claim TX Error:", nftTxError);
+      toast("NFT claim transaction receipt error", "error");
+    }
+  }, [nftWriteError, nftTxError]);
+
+  // --- Contract 1 (ChamaQuests - Tokens) Reads ---
   const { data: myStats, refetch: refetchStats } = useReadContract({
     address: CHAMAQUESTS_ADDRESS,
     abi: CHAMAQUESTS_ABI,
@@ -1692,20 +1900,49 @@ function RewardsView() {
     query: { enabled: !!address },
   });
 
+  // --- Contract 2 (ConsistencyStreakNFT - Badges) Reads ---
+  const { data: userStreakData, refetch: refetchStreak } = useReadContract({
+    address: STREAK_NFT_ADDRESS,
+    abi: STREAK_NFT_ABI,
+    functionName: "userStreaks",
+    args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
+    query: { enabled: !!address },
+  });
+
+  const { data: nftBalance, refetch: refetchBalance } = useReadContract({
+    address: STREAK_NFT_ADDRESS,
+    abi: STREAK_NFT_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    chainId: CELO_CHAIN_ID,
+    query: { enabled: !!address },
+  });
+
+  // Success handling
   useEffect(() => {
     if (isSuccess) {
-      // Small delay to ensure block indexer catch up
       setTimeout(() => {
         refetchStats();
         refetchNextReward();
-      }, 1000);
+      }, 1500);
       setModalOpen(true);
     }
   }, [isSuccess]);
 
+  useEffect(() => {
+    if (nftSuccess) {
+      setTimeout(() => {
+        refetchStreak();
+        refetchBalance();
+      }, 1500);
+      setNftModalOpen(true);
+    }
+  }, [nftSuccess]);
+
+  // Handlers
   const handleCheckIn = async () => {
     if (!address) return toast("Connect wallet first", "error");
-    
     if (chainId !== CELO_CHAIN_ID) {
       try {
         await switchChain({ chainId: CELO_CHAIN_ID });
@@ -1715,7 +1952,6 @@ function RewardsView() {
       }
       return;
     }
-
     writeContract({
       address: CHAMAQUESTS_ADDRESS,
       abi: CHAMAQUESTS_ABI,
@@ -1724,6 +1960,26 @@ function RewardsView() {
     });
   };
 
+  const handleNftClaim = async () => {
+    if (!address) return toast("Connect wallet first", "error");
+    if (chainId !== CELO_CHAIN_ID) {
+      try {
+        await switchChain({ chainId: CELO_CHAIN_ID });
+        toast("Network switched! Please click again to claim NFT.", "success");
+      } catch (err) {
+        toast("Please switch to Celo Mainnet", "error");
+      }
+      return;
+    }
+    writeNftCheck({
+      address: STREAK_NFT_ADDRESS,
+      abi: STREAK_NFT_ABI,
+      functionName: "recordConsistency",
+      chainId: CELO_CHAIN_ID,
+    });
+  };
+
+  // --- Calculate Token Check-in Data ---
   const currentStreak = myStats ? Number(myStats.streak ?? myStats[1] ?? 0) : 0;
   const lastCheckIn = myStats ? Number(myStats.lastCheckIn ?? myStats[2] ?? 0) : 0;
   const totalClaimed = myStats ? Number(formatUnits(myStats.totalClaimed ?? myStats[3] ?? 0n, 18)) : 0;
@@ -1733,7 +1989,65 @@ function RewardsView() {
   const nextRewardAmount = nextRewardData 
     ? Number(formatUnits(nextRewardData.chamaAmount ?? nextRewardData[0] ?? 0n, 18)) 
     : 10;
-  const nextDay = nextRewardData ? Number(nextRewardData.dayInCycle ?? nextRewardData[1] ?? 1) : 1;
+
+  // --- Calculate NFT Check-in Data ---
+  const nftStreak = userStreakData ? Number(userStreakData[0] || 0) : 0;
+  const lastNftClaimTimestamp = userStreakData ? Number(userStreakData[1] || 0) : 0;
+  const highestNftStreak = userStreakData ? Number(userStreakData[2] || 0) : 0;
+  const badgeCount = nftBalance ? Number(nftBalance || 0) : 0;
+
+  const canClaimNft = lastNftClaimTimestamp === 0 || (Date.now() / 1000 >= lastNftClaimTimestamp + 72000);
+  const nftTimeRemaining = Math.max(0, (lastNftClaimTimestamp + 72000) - Date.now() / 1000);
+  const nftHoursRemaining = Math.floor(nftTimeRemaining / 3600);
+  const nftMinutesRemaining = Math.floor((nftTimeRemaining % 3600) / 60);
+
+  let activeNftTier = "None";
+  let nftTierColor = "var(--text-muted)";
+  if (nftStreak >= 100) {
+    activeNftTier = "Legend Tier 🔥";
+    nftTierColor = "var(--accent-emerald)";
+  } else if (nftStreak >= 30) {
+    activeNftTier = "Diamond Tier 💎";
+    nftTierColor = "#22d3ee";
+  } else if (nftStreak >= 10) {
+    activeNftTier = "Gold Tier 🟡";
+    nftTierColor = "var(--accent-amber)";
+  } else if (nftStreak >= 4) {
+    activeNftTier = "Silver Tier ⚪";
+    nftTierColor = "#9ca3af";
+  } else if (nftStreak >= 1) {
+    activeNftTier = "Bronze Tier 🟤";
+    nftTierColor = "#b45309";
+  }
+
+  let nextNftTierName = "Silver";
+  let nextNftTierTarget = 4;
+  let prevNftTierTarget = 1;
+  
+  if (nftStreak >= 100) {
+    nextNftTierName = "Max Level";
+    nextNftTierTarget = 100;
+    prevNftTierTarget = 100;
+  } else if (nftStreak >= 30) {
+    nextNftTierName = "Legend";
+    nextNftTierTarget = 100;
+    prevNftTierTarget = 30;
+  } else if (nftStreak >= 10) {
+    nextNftTierName = "Diamond";
+    nextNftTierTarget = 30;
+    prevNftTierTarget = 10;
+  } else if (nftStreak >= 4) {
+    nextNftTierName = "Gold";
+    nextNftTierTarget = 10;
+    prevNftTierTarget = 4;
+  } else {
+    nextNftTierName = "Silver";
+    nextNftTierTarget = 4;
+    prevNftTierTarget = 0;
+  }
+
+  const nftRange = nextNftTierTarget - prevNftTierTarget;
+  const nftProgressPercent = nftRange > 0 ? Math.min(100, ((nftStreak - prevNftTierTarget) / nftRange) * 100) : 100;
 
   const verifyTask = (id, link) => {
     window.open(link, '_blank');
@@ -1744,11 +2058,11 @@ function RewardsView() {
     }, 4000);
   };
 
-  // 7-day cycle visualization
   const cycleDays = [1, 2, 3, 4, 5, 6, 7];
 
   return (
     <>
+      {/* Daily Token Check-in Modal */}
       <GlassModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -1756,69 +2070,248 @@ function RewardsView() {
         message="Your daily check-in was successfully recorded on-chain. CHAMA tokens have been minted and sent directly to your wallet! Maintain your streak to earn even bigger rewards tomorrow."
         type="streak"
       />
+
+      {/* Daily NFT Badge Modal */}
+      <GlassModal
+        isOpen={nftModalOpen}
+        onClose={() => setNftModalOpen(false)}
+        title="Consistency Badge Claimed! 🏆"
+        message="Your daily consistency has been successfully logged on-chain. A unique, dynamic Consistency Streak Badge NFT has been minted directly to your wallet! Keep up the streak to unlock higher tiers."
+        type="streak"
+      />
+
       <div className="section-header" style={{ marginBottom: 32 }}>
         <h2>
           Quests & <span className="text-gradient">Rewards</span>
         </h2>
-        <p>Check in daily to earn escalating CHAMA token rewards. Streak resets reward cycle every 7 days!</p>
+        <p>Complete daily check-ins, record streak consistency, and claim dynamic NFT badges to build reputation.</p>
       </div>
 
-      <div style={{ maxWidth: 640, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexDirection: "column", gap: 32 }}>
 
-        {/* Streak + Next Reward Card */}
-        <div className="glass-card" style={{ padding: 32, border: "1px solid rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.03)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <span style={{ fontSize: 40 }}>🔥</span>
-              <div>
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: 28, margin: 0 }}>{currentStreak} Day Streak</h3>
-                <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>Total CHAMA earned: {totalClaimed.toFixed(0)}</p>
-              </div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1 }}>Next Reward</div>
-              <div style={{ fontSize: 32, fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--accent-emerald)" }}>{nextRewardAmount}</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>CHAMA</div>
-            </div>
-          </div>
-
-          {/* 7-Day Cycle Visualization */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-            {cycleDays.map((d) => {
-              const isCompleted = dayInCycle >= d;
-              const isCurrent = dayInCycle === d;
-              const reward = d * 10;
-              return (
-                <div
-                  key={d}
-                  style={{
-                    flex: 1,
-                    textAlign: "center",
-                    padding: "12px 4px",
-                    borderRadius: 12,
-                    background: isCompleted ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.03)",
-                    border: isCurrent ? "2px solid #34d399" : isCompleted ? "1px solid rgba(52,211,153,0.3)" : "1px solid rgba(255,255,255,0.05)",
-                    transition: "all 0.3s",
-                  }}
-                >
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Day {d}</div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: isCompleted ? "#34d399" : "var(--text-secondary)" }}>{reward}</div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)" }}>CHAMA</div>
-                  {isCompleted && <div style={{ fontSize: 12, marginTop: 4 }}>✅</div>}
-                </div>
-              );
-            })}
-          </div>
-
+        {/* Premium Segmented Tab Selector */}
+        <div style={{
+          display: "flex",
+          gap: 8,
+          background: "rgba(255, 255, 255, 0.02)",
+          padding: 6,
+          borderRadius: 16,
+          border: "1px solid rgba(255, 255, 255, 0.05)",
+          maxWidth: 420,
+          margin: "0 auto",
+          width: "100%"
+        }}>
           <button
-            className="btn btn-primary"
-            onClick={handleCheckIn}
-            disabled={!canCheckIn || isPending}
-            style={{ width: "100%", justifyContent: "center", padding: "16px", fontSize: 16 }}
+            onClick={() => setActiveTab("tokens")}
+            style={{
+              flex: 1,
+              padding: "10px 16px",
+              borderRadius: 12,
+              border: "none",
+              background: activeTab === "tokens" ? "rgba(251, 191, 36, 0.1)" : "transparent",
+              color: activeTab === "tokens" ? "var(--accent-gold)" : "var(--text-secondary)",
+              border: activeTab === "tokens" ? "1px solid rgba(251, 191, 36, 0.2)" : "1px solid transparent",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.3s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              fontSize: 13
+            }}
           >
-            {isPending ? "⏳ Confirming on-chain..." : !canCheckIn ? `✅ Checked In Today (Day ${dayInCycle}/7)` : `🎯 Check In — Earn ${nextRewardAmount} CHAMA`}
+            <span>🪙</span> Token Quest
+          </button>
+          <button
+            onClick={() => setActiveTab("nft")}
+            style={{
+              flex: 1,
+              padding: "10px 16px",
+              borderRadius: 12,
+              border: "none",
+              background: activeTab === "nft" ? "rgba(52, 211, 153, 0.1)" : "transparent",
+              color: activeTab === "nft" ? "var(--accent-emerald)" : "var(--text-secondary)",
+              border: activeTab === "nft" ? "1px solid rgba(52, 211, 153, 0.2)" : "1px solid transparent",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.3s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              fontSize: 13
+            }}
+          >
+            <span>🏆</span> Streak NFT
           </button>
         </div>
+
+        {activeTab === "tokens" ? (
+          /* Card Option 1: Daily CHAMA Check-in */
+          <div className="glass-card" style={{ padding: 32, border: "1px solid rgba(251,191,36,0.2)", background: "rgba(251,191,36,0.03)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <span style={{ fontSize: 40 }}>🔥</span>
+                <div>
+                  <h3 style={{ fontFamily: "var(--font-display)", fontSize: 28, margin: 0 }}>{currentStreak} Day Streak</h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: 13, margin: 0 }}>Total CHAMA earned: {totalClaimed.toFixed(0)}</p>
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 1 }}>Next Reward</div>
+                <div style={{ fontSize: 32, fontWeight: 800, fontFamily: "var(--font-display)", color: "var(--accent-emerald)" }}>{nextRewardAmount}</div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)" }}>CHAMA</div>
+              </div>
+            </div>
+
+            {/* 7-Day Cycle Visualization */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 24 }} className="cycle-container">
+              {cycleDays.map((d) => {
+                const isCompleted = dayInCycle >= d;
+                const isCurrent = dayInCycle === d;
+                const reward = d * 10;
+                return (
+                  <div
+                    key={d}
+                    style={{
+                      flex: 1,
+                      textAlign: "center",
+                      padding: "12px 4px",
+                      borderRadius: 12,
+                      background: isCompleted ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.03)",
+                      border: isCurrent ? "2px solid #34d399" : isCompleted ? "1px solid rgba(52,211,153,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                      transition: "all 0.3s",
+                    }}
+                  >
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Day {d}</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: isCompleted ? "#34d399" : "var(--text-secondary)" }}>{reward}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>CHAMA</div>
+                    {isCompleted && <div style={{ fontSize: 12, marginTop: 4 }}>✅</div>}
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              className="btn btn-primary"
+              onClick={handleCheckIn}
+              disabled={!canCheckIn || isPending}
+              style={{ width: "100%", justifyContent: "center", padding: "16px", fontSize: 16 }}
+            >
+              {isPending ? "⏳ Confirming on-chain..." : !canCheckIn ? `✅ Checked In Today (Day ${dayInCycle}/7)` : `🎯 Check In — Earn ${nextRewardAmount} CHAMA`}
+            </button>
+          </div>
+        ) : (
+          /* Card Option 2: Daily Consistency NFT Badge */
+          <div className="glass-card nft-container-grid" style={{ 
+            padding: 36, 
+            border: "1px solid rgba(16, 185, 129, 0.25)", 
+            background: "rgba(16, 185, 129, 0.02)",
+            display: "grid",
+            gridTemplateColumns: "280px 1fr",
+            gap: 40,
+            alignItems: "center"
+          }}>
+            {/* Left Column: Premium Live SVG Preview */}
+            <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+              <NftBadgePreview streak={nftStreak} address={address} />
+            </div>
+
+            {/* Right Column: Stats & Claim */}
+            <div style={{ display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                  <div>
+                    <h3 style={{ fontFamily: "var(--font-display)", fontSize: 26, margin: 0 }}>Consistency Streak Badge</h3>
+                    <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "4px 0 0" }}>{nftStreak} Day NFT Streak</p>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6, margin: "0 0 24px" }}>
+                  Claim a free dynamic NFT Badge daily on Celo. Recording consistency daily builds your streak and updates your badge's on-chain metadata and artwork.
+                </p>
+
+                {/* Grid stats */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+                  <div style={{ background: "rgba(255,255,255,0.02)", padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Badge Tier</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: nftTierColor }}>{activeNftTier}</div>
+                  </div>
+                  <div style={{ background: "rgba(255,255,255,0.02)", padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Badges Claimed</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>{badgeCount} NFTs</div>
+                  </div>
+                </div>
+
+                {/* Progress to next Tier */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-secondary)", marginBottom: 8 }}>
+                    <span>Progress to {nextNftTierName}</span>
+                    <span>{nftStreak} / {nextNftTierTarget} Days</span>
+                  </div>
+                  <div style={{ width: "100%", height: 6, background: "rgba(255,255,255,0.05)", borderRadius: 3, overflow: "hidden" }}>
+                    <div 
+                      style={{ 
+                        width: `${nftProgressPercent}%`, 
+                        height: "100%", 
+                        background: "linear-gradient(90deg, var(--accent-emerald) 0%, #06b6d4 100%)", 
+                        borderRadius: 3, 
+                        transition: "width 0.5s ease-out" 
+                      }} 
+                    />
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
+                    Personal Best: {highestNftStreak} Days
+                  </div>
+                </div>
+              </div>
+
+              <button
+                className="btn btn-primary"
+                onClick={handleNftClaim}
+                disabled={!canClaimNft || nftPending}
+                style={{ width: "100%", justifyContent: "center", padding: "15px", fontSize: 15 }}
+              >
+                {nftPending ? (
+                  "⏳ Minting NFT..."
+                ) : !canClaimNft ? (
+                  `Locked (${nftHoursRemaining}h ${nftMinutesRemaining}m)`
+                ) : (
+                  "🎯 Claim Consistency Badge NFT"
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+      {/* CSS styles to force grid layout to stack on mobile */}
+      <style jsx>{`
+        .nft-container-grid {
+          display: grid;
+          grid-template-columns: 280px 1fr;
+          gap: 40px;
+          align-items: center;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .spinning-ring {
+          animation: spin 15s linear infinite;
+        }
+        @media (max-width: 768px) {
+          .nft-container-grid {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+            padding: 24px !important;
+          }
+          .cycle-container {
+            flex-wrap: wrap;
+            gap: 8px !important;
+          }
+        }
+      `}</style>
 
         {/* One-Time Social Tasks */}
         <div className="glass-card" style={{ padding: 32 }}>

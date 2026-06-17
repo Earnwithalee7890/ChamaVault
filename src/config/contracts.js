@@ -12,6 +12,10 @@ export const CHAMAQUESTS_ADDRESS =
   process.env.NEXT_PUBLIC_QUESTS_ADDRESS ||
   "0x4B5FB224Dd3599D14aaf850b594A46279EEDb0A0";
 
+export const STREAK_NFT_ADDRESS =
+  process.env.NEXT_PUBLIC_STREAK_NFT_ADDRESS ||
+  "0x2d0011dB43B8c2Fa9d6be77bDd624375F713D712";
+
 // Custom ChamaToken (CHMT) address
 export const CHAMATOKEN_ADDRESS =
   process.env.NEXT_PUBLIC_TOKEN_ADDRESS ||
@@ -727,6 +731,51 @@ export const celoAlfajores = {
 };
 
 export const CHAMAQUESTS_ABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"newXp","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"streak","type":"uint256"}],"name":"CheckedIn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"chamaAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"dayInCycle","type":"uint256"}],"name":"RewardClaimed","type":"event"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"allUsers","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"checkIn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"chamaToken","outputs":[{"internalType":"contract IChamaToken","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"BASE_REWARD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAllUsersStats","outputs":[{"internalType":"address[]","name":"","type":"address[]"},{"internalType":"uint256[]","name":"","type":"uint256[]"},{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"getNextReward","outputs":[{"internalType":"uint256","name":"chamaAmount","type":"uint256"},{"internalType":"uint256","name":"dayInCycle","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"streak","type":"uint256"}],"name":"getRewardForStreak","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isUser","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"stats","outputs":[{"internalType":"uint256","name":"xp","type":"uint256"},{"internalType":"uint256","name":"streak","type":"uint256"},{"internalType":"uint256","name":"lastCheckIn","type":"uint256"},{"internalType":"uint256","name":"totalClaimed","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+export const STREAK_NFT_ABI = [
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
+      { "indexed": true, "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "streak", "type": "uint256" }
+    ],
+    "name": "BadgeClaimed",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "recordConsistency",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "userStreaks",
+    "outputs": [
+      { "internalType": "uint256", "name": "currentStreak", "type": "uint256" },
+      { "internalType": "uint256", "name": "lastClaimTimestamp", "type": "uint256" },
+      { "internalType": "uint256", "name": "highestStreak", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+    "name": "balanceOf",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+    "name": "tokenURI",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
 export const CHAMASALE_ABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"cusdAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"chamaAmount","type":"uint256"}],"name":"TokensPurchasedWithCUSD","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"celoAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"chamaAmount","type":"uint256"}],"name":"TokensPurchasedWithCELO","type":"event"},{"inputs":[{"internalType":"uint256","name":"cusdAmount","type":"uint256"}],"name":"buyWithCUSD","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyWithCELO","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"CHAMA_PER_CUSD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"celoPriceUsd","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalCusdRaised","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalCeloRaised","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalChamaSold","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
