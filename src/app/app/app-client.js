@@ -37,6 +37,64 @@ function getEffectiveChainId(wagmiChainId) {
   return wagmiChainId;
 }
 
+/* ===== Premium Glassmorphic Modal ===== */
+function GlassModal({ isOpen, onClose, title, message, type = "success" }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="glass-card modal-content" style={{ cursor: "default" }}>
+        <div className="modal-header" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, marginBottom: 16 }}>
+          <span className="modal-icon" style={{ fontSize: 48, animation: "bounce 2s infinite" }}>
+            {type === "success" && "🎉"}
+            {type === "streak" && "🔥"}
+            {type === "info" && "ℹ️"}
+            {type === "error" && "⚠️"}
+          </span>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>{title}</h3>
+        </div>
+        <p className="modal-message" style={{ color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.6, margin: 0 }}>{message}</p>
+        <button className="btn btn-primary" onClick={onClose} style={{ marginTop: 24, width: "100%", justifyContent: "center" }}>
+          Awesome!
+        </button>
+      </div>
+      <style jsx>{`
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(5, 8, 15, 0.75);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content {
+          width: 100%;
+          max-width: 440px;
+          padding: 32px;
+          background: rgba(17, 24, 39, 0.85) !important;
+          border: 1px solid rgba(52, 211, 153, 0.2) !important;
+          text-align: center;
+          animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(52, 211, 153, 0.1);
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 /* ===== Navbar ===== */
 function AppNav({ view, setView }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -283,6 +341,7 @@ function CreateChamaForm({ onCreated }) {
     frequency: "604800",
     maxMembers: "5",
   });
+  const [modalOpen, setModalOpen] = useState(false);
 
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
   const { isSuccess, error: txError } = useWaitForTransactionReceipt({ hash: txHash });
@@ -303,8 +362,7 @@ function CreateChamaForm({ onCreated }) {
 
   useEffect(() => {
     if (isSuccess) {
-      toast("Chama created on-chain! 🎉", "success");
-      if (onCreated) onCreated();
+      setModalOpen(true);
     }
   }, [isSuccess]);
 
@@ -349,6 +407,16 @@ function CreateChamaForm({ onCreated }) {
 
   return (
     <div className="create-form glass-card" style={{ padding: 40, maxWidth: 640, margin: "0 auto" }}>
+      <GlassModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          if (onCreated) onCreated();
+        }}
+        title="Circle Created On-Chain! 🎉"
+        message={`Your savings circle "${form.name}" has been successfully created on Celo. Other members can now search for and join it!`}
+        type="success"
+      />
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: 28, marginBottom: 8 }}>
         Create a <span className="text-gradient">New Circle</span>
       </h2>
@@ -1520,6 +1588,7 @@ function RewardsView() {
   const chainId = getEffectiveChainId(wagmiChainId);
   const toast = useToast();
   const { switchChain } = useSwitchChain();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [tasks, setTasks] = useState([
     { id: 1, title: "Follow @aleeasghar78 on X", reward: "+50 XP", done: false, link: "https://x.com/aleeasghar78" },
@@ -1566,7 +1635,7 @@ function RewardsView() {
         refetchStats();
         refetchNextReward();
       }, 1000);
-      toast("Check-in confirmed! CHAMA tokens minted to your wallet! 🔥💰", "success");
+      setModalOpen(true);
     }
   }, [isSuccess]);
 
@@ -1616,6 +1685,13 @@ function RewardsView() {
 
   return (
     <>
+      <GlassModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Check-In Confirmed! 🔥"
+        message="Your daily check-in was successfully recorded on-chain. CHAMA tokens have been minted and sent directly to your wallet! Maintain your streak to earn even bigger rewards tomorrow."
+        type="streak"
+      />
       <div className="section-header" style={{ marginBottom: 32 }}>
         <h2>
           Quests & <span className="text-gradient">Rewards</span>
