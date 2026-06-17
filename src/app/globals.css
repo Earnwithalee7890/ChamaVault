@@ -699,3 +699,65 @@ body {
   font-size: 18px;
   font-weight: 700;
 }
+
+/* ===== ANIMATED BACKDROP ===== */
+.premium-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--bg-primary);
+  overflow: hidden;
+  pointer-events: none;
+}
+.mesh-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+  opacity: 0.8;
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.12;
+  mix-blend-mode: screen;
+  animation: float-blob 25s infinite alternate ease-in-out;
+}
+.blob-1 {
+  top: -10%;
+  left: 10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, #34d399 0%, transparent 70%);
+  animation-duration: 20s;
+}
+.blob-2 {
+  bottom: -10%;
+  right: 10%;
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, #fbbf24 0%, transparent 70%);
+  animation-duration: 28s;
+  animation-delay: -5s;
+}
+.blob-3 {
+  top: 40%;
+  left: 50%;
+  width: 35vw;
+  height: 35vw;
+  background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
+  animation-duration: 24s;
+  animation-delay: -10s;
+}
+@keyframes float-blob {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8%, 5%) scale(1.15); }
+  100% { transform: translate(-5%, -8%) scale(0.9); }
+}
+

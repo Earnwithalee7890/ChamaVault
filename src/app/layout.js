@@ -44,6 +44,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <div className="premium-bg">
+          <div className="mesh-grid"></div>
+          <div className="blob blob-1"></div>
+          <div className="blob blob-2"></div>
+          <div className="blob blob-3"></div>
+        </div>
         <MiniPayBanner />
         {children}
         <AIAssistant />
