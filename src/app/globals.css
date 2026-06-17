@@ -754,10 +754,71 @@ body {
   background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
   animation-duration: 24s;
   animation-delay: -10s;
-}
-@keyframes float-blob {
+}@keyframes float-blob {
   0% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(8%, 5%) scale(1.15); }
   100% { transform: translate(-5%, -8%) scale(0.9); }
+}
+
+/* ===== SPRING ANIMATIONS & TRANSITIONS ===== */
+.glass-card {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+.glass-card:hover {
+  transform: translateY(-6px) scale(1.015) !important;
+  box-shadow: 0 15px 35px rgba(52, 211, 153, 0.15), var(--shadow-glow) !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+.btn {
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+.btn:hover {
+  transform: translateY(-3px) scale(1.03) !important;
+}
+.btn:active {
+  transform: translateY(-1px) scale(0.98) !important;
+}
+
+/* Shimmer Effect for Primary Buttons */
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 30%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(30deg);
+  transition: none;
+  animation: shimmer 4s infinite linear;
+  pointer-events: none;
+}
+@keyframes shimmer {
+  0% { left: -60%; }
+  30% { left: 140%; }
+  100% { left: 140%; }
+}
+
+/* Pulsing energy arcs for active states */
+.live-pulse {
+  position: relative;
+}
+.live-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid var(--accent-emerald);
+  opacity: 0;
+  animation: ripple-pulse 2s infinite ease-out;
+  pointer-events: none;
+}
+@keyframes ripple-pulse {
+  0% { transform: scale(0.98); opacity: 0.8; }
+  100% { transform: scale(1.08); opacity: 0; }
 }
 
