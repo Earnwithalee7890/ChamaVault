@@ -859,6 +859,67 @@ function LeaderboardView() {
   );
 }
 
+/* ===== Yield Calculator Component ===== */
+function YieldCalculator({ currentTier }) {
+  const [stakeAmount, setStakeAmount] = useState(10);
+  
+  const multi = currentTier === 2 ? 3.0 : currentTier === 1 ? 1.5 : 1.0;
+  const dailyYield = stakeAmount * 0.000000432 * multi;
+  const monthlyYield = dailyYield * 30;
+  const yearlyYield = dailyYield * 365;
+
+  return (
+    <div className="glass-card" style={{ padding: 24, border: "1px solid rgba(52, 211, 153, 0.2)", background: "rgba(10, 14, 23, 0.3)", marginTop: 28 }}>
+      <h4 style={{ fontSize: 16, fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: 8 }}>
+        Staking <span className="text-gradient">Yield Calculator</span>
+      </h4>
+      <p style={{ color: "var(--text-secondary)", fontSize: 12, marginBottom: 20 }}>
+        Estimate your yCHAMA yield emissions based on your staked CHMT balance and Rig level ({multi}x multiplier).
+      </p>
+      
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
+          <span>Forecast Staked CHMT</span>
+          <span className="text-gradient" style={{ fontSize: 15, fontWeight: "700" }}>{stakeAmount} CHMT</span>
+        </div>
+        <input 
+          type="range" 
+          min="10" 
+          max="5000" 
+          step="10"
+          value={stakeAmount}
+          onChange={(e) => setStakeAmount(Number(e.target.value))}
+          style={{ width: "100%", height: 6, borderRadius: 3, background: "rgba(255,255,255,0.08)", outline: "none", cursor: "pointer", accentColor: "var(--accent-emerald)" }}
+        />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+        <div className="glass-card" style={{ padding: 12, textAlign: "center", background: "rgba(255,255,255,0.01)" }}>
+          <div style={{ color: "var(--text-muted)", fontSize: 10, textTransform: "uppercase" }}>Daily Est</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--accent-emerald)", fontFamily: "monospace", marginTop: 4 }}>
+            {dailyYield.toFixed(8)}
+          </div>
+          <div style={{ color: "var(--text-muted)", fontSize: 9 }}>yCHAMA</div>
+        </div>
+        <div className="glass-card" style={{ padding: 12, textAlign: "center", background: "rgba(255,255,255,0.01)" }}>
+          <div style={{ color: "var(--text-muted)", fontSize: 10, textTransform: "uppercase" }}>Monthly Est</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--accent-emerald)", fontFamily: "monospace", marginTop: 4 }}>
+            {monthlyYield.toFixed(8)}
+          </div>
+          <div style={{ color: "var(--text-muted)", fontSize: 9 }}>yCHAMA</div>
+        </div>
+        <div className="glass-card" style={{ padding: 12, textAlign: "center", background: "rgba(255,255,255,0.01)" }}>
+          <div style={{ color: "var(--text-muted)", fontSize: 10, textTransform: "uppercase" }}>Yearly Est</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--accent-emerald)", fontFamily: "monospace", marginTop: 4 }}>
+            {yearlyYield.toFixed(6)}
+          </div>
+          <div style={{ color: "var(--text-muted)", fontSize: 9 }}>yCHAMA</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ===== Mining View ===== */
 function MiningView() {
   const { address, chainId: wagmiChainId } = useAccount();
@@ -1393,6 +1454,9 @@ function MiningView() {
                   )}
                 </div>
               </div>
+
+              {/* Staking Yield Calculator */}
+              <YieldCalculator currentTier={currentTier} />
             </div>
           </div>
         </div>
