@@ -817,8 +817,53 @@ body {
   animation: ripple-pulse 2s infinite ease-out;
   pointer-events: none;
 }
+
 @keyframes ripple-pulse {
   0% { transform: scale(0.98); opacity: 0.8; }
   100% { transform: scale(1.08); opacity: 0; }
 }
+
+/* ===== MOBILE VIEWPORT ENHANCEMENTS ===== */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 34px !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.5px !important;
+  }
+  h2 {
+    font-size: 26px !important;
+  }
+  .section {
+    padding: 60px 0 !important;
+  }
+  .container {
+    padding: 0 16px !important;
+  }
+  .form-input {
+    padding: 16px 20px !important;
+    font-size: 16px !important;
+  }
+  .category-btn {
+    padding: 12px 6px !important;
+    gap: 4px !important;
+  }
+  .cat-icon {
+    font-size: 20px !important;
+  }
+  .cat-name {
+    font-size: 10px !important;
+  }
+  .btn {
+    padding: 14px 24px !important;
+    font-size: 15px !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  .hero-actions {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+}
+
 
