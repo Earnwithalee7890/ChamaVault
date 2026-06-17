@@ -136,6 +136,88 @@ function ScrollToTop() {
   );
 }
 
+/* ===== FAQ Accordion Section ===== */
+function FAQSection() {
+  const [activeIdx, setActiveIdx] = useState(null);
+  const faqItems = [
+    {
+      q: "What is a Rotating Savings Circle (Chama)?",
+      a: "A rotating savings circle is a group of trusted individuals who contribute a fixed amount of money regularly (weekly or monthly). Each round, one member receives the entire pool of money collected. The cycle continues until every member has had their turn. It's a popular mutual financial aid system across the globe under various names like Susu, Tontine, Stokvel, and Chama."
+    },
+    {
+      q: "How does ChamaVault make this trustless?",
+      a: "ChamaVault uses Celo smart contracts to enforce circle rules. Instead of relying on a human organizer, members deposit their funds directly into the smart contract. The contract automatically calculates payouts, tracks who has contributed, and handles payouts to the correct recipient. If a member defaults, their reputation score is instantly affected, and they are restricted from future pots."
+    },
+    {
+      q: "What stablecoins are used on ChamaVault?",
+      a: "All savings circles are currently run using cUSD (Celo Dollar), a stable cryptocurrency pegged to the US Dollar. Staking and hardware upgrades use CHMT (ChamaToken), which can be obtained via the token sale or faucet."
+    },
+    {
+      q: "How does the Yield Staking & Mining work?",
+      a: "Stakers can deposit CHMT tokens into our Mining panel to earn passive yCHAMA rewards. Staking yields accumulate in real-time. Members can upgrade their hardware rigs (Lite Rig for 1.5x boost, Pro Rig for 3.0x boost) to accelerate their yield emissions."
+    },
+    {
+      q: "How do I check in daily to get Quests points?",
+      a: "Go to the Quests tab and click 'Check In'. Every consecutive day you check in increases your Daily Streak up to 7 days, giving you escalating CHAMA rewards. A streak reset resets the cycle back to Day 1."
+    }
+  ];
+
+  const toggleFAQ = (idx) => {
+    setActiveIdx(activeIdx === idx ? null : idx);
+  };
+
+  return (
+    <section className="section" id="faq" style={{ background: "rgba(10, 14, 23, 0.4)" }}>
+      <div className="container">
+        <div className="section-header">
+          <h2>Frequently Asked <span className="text-gradient">Questions</span></h2>
+          <p>Everything you need to know about savings circles, staking yields, and security.</p>
+        </div>
+        <div style={{ maxWidth: 760, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
+          {faqItems.map((item, idx) => {
+            const isOpen = activeIdx === idx;
+            return (
+              <div 
+                key={idx} 
+                className="glass-card faq-card"
+                style={{ 
+                  borderRadius: 16, 
+                  padding: 24, 
+                  cursor: "pointer", 
+                  border: isOpen ? "1px solid rgba(52, 211, 153, 0.3)" : "1px solid var(--border-glass)",
+                  background: isOpen ? "rgba(52, 211, 153, 0.02)" : undefined,
+                  transition: "all 0.3s ease"
+                }}
+                onClick={() => toggleFAQ(idx)}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 style={{ fontSize: 16, fontFamily: "var(--font-display)", fontWeight: 700, color: isOpen ? "var(--accent-emerald)" : "var(--text-primary)", transition: "color 0.2s" }}>
+                    {item.q}
+                  </h3>
+                  <span style={{ fontSize: 20, color: isOpen ? "var(--accent-emerald)" : "var(--text-secondary)", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.3s ease" }}>
+                    ▼
+                  </span>
+                </div>
+                <div style={{ 
+                  maxHeight: isOpen ? 200 : 0, 
+                  overflow: "hidden", 
+                  transition: "all 0.3s cubic-bezier(0, 1, 0, 1)", 
+                  marginTop: isOpen ? 12 : 0, 
+                  color: "var(--text-secondary)", 
+                  fontSize: 14,
+                  lineHeight: 1.6
+                }}>
+                  {item.a}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const featuresRef = useAnimateIn();
   const stepsRef = useAnimateIn();
@@ -360,7 +442,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section>      <FAQSection />
 
       {/* ===== CTA ===== */}
       <section className="cta-section animate-in" ref={ctaRef} id="cta">
