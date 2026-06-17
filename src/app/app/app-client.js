@@ -12,6 +12,8 @@ import {
   CHAMAMINER_ADDRESS,
   CHAMAQUESTS_ABI,
   CHAMAQUESTS_ADDRESS,
+  STREAK_NFT_ABI,
+  STREAK_NFT_ADDRESS,
   CHAMASALE_ABI,
   CHAMASALE_ADDRESS,
   CUSD_ADDRESS,
@@ -166,7 +168,13 @@ function AppNav({ view, setView }) {
           </div>
         </div>
         <style jsx>{`
-          .dashboard-nav .nav-icon { margin-right: 8px; font-size: 16px; }
+          .dashboard-nav a {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+          }
+          .dashboard-nav .nav-icon { font-size: 16px; display: flex; align-items: center; }
           .dashboard-nav a.active { color: var(--accent-emerald) !important; font-weight: 700; }
           
           .mobile-menu-toggle {
