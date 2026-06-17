@@ -2073,6 +2073,58 @@ function TokenSaleView() {
   );
 }
 
+/* ===== Dashboard Quick Onboarding Banner ===== */
+function QuickOnboarding() {
+  const [slide, setSlide] = useState(0);
+  const slides = [
+    {
+      title: "1. Join or Create a Savings Circle 🤝",
+      desc: "Browse circles or create one specifying contribution amount, member count, and frequency (daily, weekly, monthly). Smart contracts manage the pot automatically."
+    },
+    {
+      title: "2. Passive Staking Mining Yields ⛏️",
+      desc: "Stake your CHMT tokens in the Mining tab to passively generate yCHAMA yield. Emitted rewards accumulate every millisecond and are harvestable anytime."
+    },
+    {
+      title: "3. Complete Quests & Build Reputation ⚔️",
+      desc: "Check-in daily to grow your day-streak and reputation score. Maintain consistency to boost your yield multiplier and buy hardware upgrade rigs."
+    }
+  ];
+
+  return (
+    <div className="glass-card" style={{ padding: 24, border: "1px solid rgba(52, 211, 153, 0.25)", background: "linear-gradient(135deg, rgba(52, 211, 153, 0.05) 0%, rgba(251, 191, 36, 0.02) 100%)", marginBottom: 28, cursor: "default" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <h4 style={{ fontSize: 15, fontFamily: "var(--font-display)", fontWeight: 700, margin: 0, color: "var(--accent-emerald)" }}>
+          {slides[slide].title}
+        </h4>
+        <span style={{ fontSize: 11, color: "var(--text-secondary)", fontWeight: "600" }}>Step {slide + 1} of 3</span>
+      </div>
+      <p style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, margin: "0 0 16px" }}>
+        {slides[slide].desc}
+      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          {slides.map((_, idx) => (
+            <button 
+              key={idx}
+              onClick={() => setSlide(idx)}
+              style={{ width: 8, height: 8, borderRadius: "50%", border: "none", background: slide === idx ? "var(--accent-emerald)" : "rgba(255,255,255,0.15)", cursor: "pointer", transition: "all 0.2s" }}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+        <button 
+          className="btn btn-secondary"
+          onClick={() => setSlide((slide + 1) % 3)}
+          style={{ padding: "6px 16px", fontSize: 12, borderRadius: 8 }}
+        >
+          Next Step →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ===== Main App Content ===== */
 function AppContent() {
   const [view, setView] = useState("explore");
@@ -2123,6 +2175,9 @@ function AppContent() {
               </h2>
               <p>Browse real savings circles on Celo. Join one or create your own.</p>
             </div>
+
+            {/* Quick onboarding carousel */}
+            <QuickOnboarding />
 
             {/* Category filter */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 32, justifyContent: "center" }}>
