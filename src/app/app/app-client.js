@@ -1214,6 +1214,11 @@ function MiningView() {
                     <span className="multiplier">1.5x Boost</span>
                     <span className="price">10 CHMT</span>
                   </div>
+                  <div className="upgrade-details-list" style={{ fontSize: 11, color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: 6, margin: "8px 0 12px", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Daily ROI:</span><span style={{ color: "var(--accent-emerald)", fontWeight: "600" }}>+1.5%</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Emission:</span><span>0.003375/s</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Payback Est:</span><span>10 Days</span></div>
+                  </div>
                   {currentTier >= 1 ? (
                     <button className="upgrade-btn" disabled>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6, display: "inline-block", verticalAlign: "middle" }}>
@@ -1268,6 +1273,11 @@ function MiningView() {
                   <div className="upgrade-meta">
                     <span className="multiplier">3.0x Boost</span>
                     <span className="price">50 CHMT</span>
+                  </div>
+                  <div className="upgrade-details-list" style={{ fontSize: 11, color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: 6, margin: "8px 0 12px", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Daily ROI:</span><span style={{ color: "var(--accent-emerald)", fontWeight: "600" }}>+3.0%</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Emission:</span><span>0.006750/s</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Payback Est:</span><span>7 Days</span></div>
                   </div>
                   {currentTier >= 2 ? (
                     <button className="upgrade-btn" disabled>
