@@ -11,6 +11,7 @@ export default function WalletConnect() {
   const { address: wagmiAddress, isConnected } = useAccount();
   const [hasInjected, setHasInjected] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [userClickedDisconnect, setUserClickedDisconnect] = useState(false);
   
   useEffect(() => {
     setMounted(true);
@@ -21,10 +22,10 @@ export default function WalletConnect() {
 
   // Auto-connect inside MiniPay or other auto-connect dApp browsers
   useEffect(() => {
-    if (hasInjected && typeof window !== "undefined" && window.ethereum?.isMiniPay && !isConnected && mounted) {
+    if (hasInjected && typeof window !== "undefined" && window.ethereum?.isMiniPay && !isConnected && mounted && !userClickedDisconnect) {
       connect({ connector: injected() });
     }
-  }, [hasInjected, isConnected, mounted, connect]);
+  }, [hasInjected, isConnected, mounted, connect, userClickedDisconnect]);
 
   if (!mounted) {
     return <div style={{ width: 150, height: 40, background: "rgba(255,255,255,0.05)", borderRadius: 10 }}></div>;
@@ -36,10 +37,14 @@ export default function WalletConnect() {
     return (
       <button 
         className="btn btn-secondary" 
-        onClick={() => disconnect()}
+        onClick={() => {
+          setUserClickedDisconnect(true);
+          disconnect();
+          if (authenticated) logout();
+        }}
         style={{ padding: "8px 16px", fontSize: 14 }}
       >
-        {displayAddress} (Disconnect)
+        {displayAddress}<span className="desktop-only-inline"> (Disconnect)</span>
       </button>
     );
   }
@@ -52,10 +57,14 @@ export default function WalletConnect() {
     return (
       <button 
         className="btn btn-secondary" 
-        onClick={logout} 
+        onClick={() => {
+          setUserClickedDisconnect(true);
+          logout();
+          disconnect();
+        }} 
         style={{ padding: "8px 16px", fontSize: 14 }}
       >
-        {displayAddress} (Logout)
+        {displayAddress}<span className="desktop-only-inline"> (Logout)</span>
       </button>
     );
   }
@@ -66,7 +75,10 @@ export default function WalletConnect() {
     return (
       <button 
         className="btn btn-primary" 
-        onClick={() => connect({ connector: injected() })} 
+        onClick={() => {
+          setUserClickedDisconnect(false);
+          connect({ connector: injected() });
+        }} 
         style={{ padding: "8px 16px", fontSize: 14 }}
       >
         {label}
@@ -76,7 +88,14 @@ export default function WalletConnect() {
 
   // Desktop without extension / standard browser -> Privy login
   return (
-    <button className="btn btn-primary" onClick={login} style={{ padding: "8px 16px", fontSize: 14 }}>
+    <button 
+      className="btn btn-primary" 
+      onClick={() => {
+        setUserClickedDisconnect(false);
+        login();
+      }} 
+      style={{ padding: "8px 16px", fontSize: 14 }}
+    >
       Connect Wallet
     </button>
   );

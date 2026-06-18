@@ -864,6 +864,15 @@ body {
     gap: 12px;
     width: 100%;
   }
+  .desktop-only-inline {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .desktop-only {
+    display: none !important;
+  }
 }
 
 
